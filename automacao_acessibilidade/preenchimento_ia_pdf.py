@@ -431,23 +431,27 @@ def rodar_apresentacao_libras():
 *{{margin:0!important;padding:0!important;box-sizing:border-box!important}}
 html,body{{width:100vw;height:100vh;overflow:hidden!important;background:#1a1a2e}}
 #alvo{{position:fixed;top:5px;left:5px;opacity:0.01;z-index:1;pointer-events:auto;font-size:1px}}
-[vw-access-button]{{display:none!important}}
-[vw]{{position:fixed!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;
-width:100%!important;height:100%!important;z-index:999999!important;display:flex!important;align-items:center!important;justify-content:center!important}}
-[vw-plugin-wrapper]{{position:relative!important;width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important}}
-[vw] iframe{{width:100%!important;height:100%!important;border:none!important;display:block!important;margin:auto!important}}
-.vw-plugin-top-wrapper{{display:none!important}}
 </style></head><body>
 <div id="alvo">{texto}</div>
-<div vw class="enabled"><div vw-access-button class="active"></div><div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div></div>
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
-window.addEventListener('load',function(){{setTimeout(function(){{
-var btn=document.querySelector('[vw-access-button]');if(btn)btn.click();
-setTimeout(function(){{var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
+function abrirBoneco(){{
+var wrap=document.getElementById('vlibras-access-wrapper');
+var btn=wrap&&wrap.shadowRoot?wrap.shadowRoot.querySelector('#vlibras-button'):null;
+if(btn){{btn.click();return true;}}
+return false;
+}}
+window.addEventListener('load',function(){{
+var tentativas=0;
+var esperaBotao=setInterval(function(){{
+tentativas++;
+if(abrirBoneco()||tentativas>40){{clearInterval(esperaBotao);}}
+}},250);
+setTimeout(function(){{
+var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
 var range=document.createRange();range.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
-el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}},15000);}},2000);}});
+el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}},38000);}});
 </script></body></html>"""
     with open(CAMINHO_HTML, "w", encoding="utf-8") as f:
         f.write(html)
@@ -878,7 +882,7 @@ class DDSAppIA(ctk.CTk):
         self._salvar_autosave()
         log.info(f"DDS salvo ({len(txt)} chars)")
         self._status("💾 Salvo. Abrindo apresentação...", "#2e7d32")
-        messagebox.showinfo("✅ Salvo!", "DDS salvo!\nO navegador abrirá a apresentação.\n\nDica: F11 = tela cheia.")
+        messagebox.showinfo("✅ Salvo!", "DDS salvo!\nO navegador vai abrir e o boneco de Libras aparece sozinho.\n\nO primeiro carregamento do avatar pode levar até 40 segundos.")
         rodar_apresentacao_libras()
 def garantir_modelo_ollama():
     """Cria o modelo narrador-dds no Ollama se ainda não existir."""
