@@ -442,11 +442,19 @@ var btn=wrap&&wrap.shadowRoot?wrap.shadowRoot.querySelector('#vlibras-button'):n
 if(btn){{btn.click();return true;}}
 return false;
 }}
+function expandirBoneco(){{
+var root=document.getElementById('vlibras-app-root');
+var btn=root&&root.shadowRoot?root.shadowRoot.querySelector('button[aria-label="Expandir"]'):null;
+if(btn){{btn.click();return true;}}
+return false;
+}}
 window.addEventListener('load',function(){{
-var tentativas=0;
+var tentativas=0,abriu=false,expandiu=false;
 var esperaBotao=setInterval(function(){{
 tentativas++;
-if(abrirBoneco()||tentativas>40){{clearInterval(esperaBotao);}}
+if(!abriu)abriu=abrirBoneco();
+if(abriu&&!expandiu)expandiu=expandirBoneco();
+if((abriu&&expandiu)||tentativas>60){{clearInterval(esperaBotao);}}
 }},250);
 setTimeout(function(){{
 var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
