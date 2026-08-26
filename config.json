@@ -1,0 +1,13 @@
+{
+    "ollama_url": "http://localhost:11434/api/generate",
+    "modelo_ia": "narrador-dds",
+    "thresholds": {
+        "d1_geral": 0.68,
+        "d1_area": 0.45,
+        "ftt_geral": 97.9,
+        "ftt_area": 95.5,
+        "mves_geral": 2.5,
+        "mves_area": 0.5,
+        "_5s_pular": 90
+    }
+}

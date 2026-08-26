@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <title>HPE - DDS LIBRAS</title>
+    <style>
+        * { margin:0!important; padding:0!important; box-sizing:border-box!important; }
+
+        html {
+            width:100vw; height:100vh;
+            overflow:hidden!important;
+            background:#1a1a2e;
+        }
+
+        body {
+            position:fixed!important;
+            top:50%!important;
+            left:50%!important;
+            width:100vh!important;
+            height:100vw!important;
+            transform: translate(-50%, -50%) rotate(90deg)!important;
+            transform-origin: center center!important;
+            overflow:hidden!important;
+            background:#1a1a2e;
+        }
+
+        #alvo {
+            position:fixed;
+            top:5px; left:5px;
+            opacity:0.01;
+            z-index:1;
+            pointer-events:auto;
+            font-size:1px;
+        }
+
+        [vw-access-button] { display:none!important; }
+
+        [vw] {
+            position:fixed!important;
+            top:50%!important;
+            left:50%!important;
+            transform:translate(-50%, -50%)!important;
+            width:100%!important;
+            height:100%!important;
+            z-index:999999!important;
+            display:flex!important;
+            align-items:center!important;
+            justify-content:center!important;
+        }
+
+        [vw-plugin-wrapper] {
+            position:relative!important;
+            width:100%!important;
+            height:100%!important;
+            display:flex!important;
+            align-items:center!important;
+            justify-content:center!important;
+        }
+
+        [vw] iframe {
+            width:100%!important;
+            height:100%!important;
+            border:none!important;
+            display:block!important;
+            margin:auto!important;
+        }
+
+        .vw-plugin-top-wrapper { display:none!important; }
+    </style>
+</head>
+<body>
+    <div id="alvo">Bom dia. Reunião DDS agora.. . Diálogo do dia.. ⚡ DDS: Segurança Elétrica. ASSUNTO: IMPORTANTE REGISTRAR &quot;REPORT&quot; E PERIGO ELÉTRICO.. . COMO EVITAR ACIDENTE ELÉTRICO:. . EVITAR LIGAR APARELHO FORTE EM EXTENSÃO COMUM.. PROIBIDO DEIXAR FIO ESTICADO ONDE PESSOA PASSA.. NÃO USAR TOMADA OU FIO COM SINAL QUEIMADO OU ESTRAGADO.. APARELHO POTENTE: LIGAR DIRETO NA TOMADA DA PAREDE.. CABOS: ORGANIZAR DENTRO DE CANALETAS OU TUBOS.. ITEM ESTRAGADO: AVISAR MANUTENÇÃO PARA TROCAR RÁPIDO.. LEMBRE-SE:. SE REDE ELÉTRICA PRECISAR MELHORAR, CHAMAR EQUIPE MANUTENÇÃO.. PROIBIDO IMPROVISAR!. . Segurança.. Não houve ocorrência ontem.. Descrição: Bandeira verde.. Bandeira segurança: verde.. . Qualidade.. D1 0.36. Foco lIMITADOR DA PORTA DD/TD INVERTIDO.. FTT 9750.0 por cento.. MVES 3.0. Foco QUARNIÇÃO DA PORTA DD SOLTA.. Bandeira qualidade: vermelha.. . Produção.. Ontem produção real 40.0 unidades. Meta 39.0 unidades.. Bandeira produção: verde.. . Organização cinco s.. Nota 83.0 por cento. Foco ARMARIO DESORGANIZADO.. Bandeira cinco s: vermelha.. . Resultado geral.. Bandeira geral: vermelha.. Prioridade qualidade.. . Obrigado. Bom trabalho.</div>
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
+    </div>
+
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                var btn = document.querySelector('[vw-access-button]');
+                if (btn) btn.click();
+                setTimeout(function() {
+                    var el = document.getElementById('alvo');
+                    el.style.fontSize = '16px';
+                    el.style.width = 'auto';
+                    el.style.height = 'auto';
+                    var range = document.createRange();
+                    range.selectNodeContents(el);
+                    var sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    el.dispatchEvent(new MouseEvent('mouseup', {bubbles:true}));
+                    el.dispatchEvent(new MouseEvent('click',   {bubbles:true}));
+                }, 15000);
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

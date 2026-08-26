@@ -1,0 +1,56 @@
+2026-05-14 14:19:15,521 [INFO] IA OK em 5.2s (409 chars)
+2026-05-14 14:19:30,271 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem para melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores na estrada. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.9, "d1_foco": "Porta dianteira externa arranhada.", "d1_bandeira": "ver...
+2026-05-14 14:19:40,869 [INFO] IA OK em 10.6s (1083 chars)
+2026-05-14 14:25:10,362 [INFO] Autosave restaurado
+2026-05-14 14:27:23,535 [INFO] Autosave restaurado
+2026-05-14 14:27:45,843 [INFO] Autosave restaurado
+2026-05-14 14:29:01,234 [INFO] IA OK em 7.8s (389 chars)
+2026-05-14 14:29:16,356 [INFO] Preview JSON: {"dialogo_dia": "Beber água e comer bem ajuda a melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores na estrada. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta dianteira externa arranhada.", "d1_bandeira":...
+2026-05-14 14:29:26,196 [INFO] IA OK em 9.8s (947 chars)
+2026-05-14 14:30:20,118 [INFO] Preview JSON: {"dialogo_dia": "Beber água e comer bem ajuda a melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores na estrada. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta dianteira externa arranhada.", "d1_bandeira":...
+2026-05-14 14:30:28,848 [INFO] IA OK em 8.7s (987 chars)
+2026-05-14 14:30:39,652 [INFO] DDS salvo (987 chars)
+2026-05-14 14:32:40,579 [INFO] IA OK em 5.1s (336 chars)
+2026-05-14 14:35:55,889 [INFO] DDS salvo (987 chars)
+2026-05-14 14:39:21,560 [INFO] DDS salvo (983 chars)
+2026-05-14 14:41:17,924 [INFO] DDS salvo (615 chars)
+2026-05-14 14:47:49,806 [INFO] Autosave restaurado
+2026-05-14 14:48:07,341 [INFO] IA OK em 7.1s (293 chars)
+2026-05-14 14:48:07,877 [INFO] Preview JSON: {"dialogo_dia": "Comer bem ajuda no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Rebocadores se chocaram. Ninguém ficou doente.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada.", "d1_bandeira": "verde", "ftt": 90.0, "ftt_foco": "Lanterna traseira esquerda...
+2026-05-14 14:48:17,489 [INFO] IA OK em 9.6s (911 chars)
+2026-05-14 14:48:57,879 [INFO] DDS salvo (911 chars)
+2026-05-14 15:14:24,817 [INFO] Autosave restaurado
+2026-05-14 15:15:24,574 [INFO] Autosave restaurado
+2026-05-14 15:17:58,009 [INFO] IA OK em 12.3s (369 chars)
+2026-05-14 15:18:11,150 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem para melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores no setor de logística. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada na frente.", "d1_bandeira": "...
+2026-05-14 15:18:21,424 [INFO] IA OK em 10.3s (1034 chars)
+2026-05-14 15:18:41,749 [INFO] DDS salvo (1034 chars)
+2026-05-14 15:22:06,280 [INFO] DDS salvo (154 chars)
+2026-05-14 15:23:18,236 [INFO] DDS salvo (21 chars)
+2026-05-14 15:23:54,467 [INFO] DDS salvo (20 chars)
+2026-05-14 15:24:38,170 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem para melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores no setor de logística. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada na frente.", "d1_bandeira": "...
+2026-05-14 15:24:38,170 [INFO] Cache hit: 2685d0b8c1
+2026-05-14 15:25:05,900 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem para melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores no setor de logística. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada na frente.", "d1_bandeira": "...
+2026-05-14 15:25:05,901 [INFO] Cache hit: 2685d0b8c1
+2026-05-14 15:25:26,725 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem para melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores no setor de logística. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada na frente.", "d1_bandeira": "...
+2026-05-14 15:25:26,725 [INFO] Cache hit: 2685d0b8c1
+2026-05-14 15:25:42,207 [INFO] DDS salvo (1014 chars)
+2026-05-14 15:31:26,555 [INFO] Autosave restaurado
+2026-05-14 15:31:32,851 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem para melhorar a atenção no trabalho.", "seguranca": {"ocorrencias": 1, "descricao": "Colisão de rebocadores no setor de logística. Ninguém ficou ferido.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada na frente.", "d1_bandeira": "...
+2026-05-14 15:31:32,852 [INFO] Cache hit: 2685d0b8c1
+2026-05-14 15:31:34,078 [INFO] DDS salvo (1034 chars)
+2026-05-18 09:43:26,369 [INFO] Autosave restaurado
+2026-05-18 09:43:55,968 [INFO] IA OK em 11.1s (308 chars)
+2026-05-18 09:44:00,430 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem para trabalhar melhor.", "seguranca": {"ocorrencias": 1, "descricao": "Rebocadores se chocaram. Ninguém ficou doente.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada.", "d1_bandeira": "verde", "ftt": 90.0, "ftt_foco": "Lanterna tr...
+2026-05-18 09:44:10,101 [INFO] IA OK em 9.7s (964 chars)
+2026-05-18 09:44:29,345 [INFO] DDS salvo (964 chars)
+2026-05-27 13:11:03,691 [INFO] Autosave restaurado
+2026-05-27 13:11:58,366 [INFO] Autosave restaurado
+2026-05-27 13:12:21,752 [INFO] IA OK em 13.0s (267 chars)
+2026-05-27 13:12:27,298 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem.", "seguranca": {"ocorrencias": 1, "descricao": "Rebocadores se chocaram. Ninguém ficou doente.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada.", "d1_bandeira": "verde", "ftt": 90.0, "ftt_foco": "Lanterna traseira esquerda arrisc...
+2026-05-27 13:12:36,590 [INFO] IA OK em 9.3s (879 chars)
+2026-05-27 13:12:43,968 [INFO] DDS salvo (879 chars)
+2026-06-03 11:37:07,533 [INFO] Autosave restaurado
+2026-06-03 11:38:22,692 [INFO] Preview JSON: {"dialogo_dia": "Beba água e coma bem.", "seguranca": {"ocorrencias": 1, "descricao": "Rebocadores se chocaram. Ninguém ficou doente.", "bandeira": "vermelha"}, "qualidade": {"d1": 0.1, "d1_foco": "Porta arranhada.", "d1_bandeira": "verde", "ftt": 90.0, "ftt_foco": "Lanterna traseira esquerda arrisc...
+2026-06-03 11:38:22,693 [INFO] Cache hit: 9eb1bbe509
+2026-06-03 11:38:52,426 [INFO] DDS salvo (879 chars)

@@ -1,0 +1,25 @@
+<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>HPE-DDS LIBRAS</title>
+<style>
+*{margin:0!important;padding:0!important;box-sizing:border-box!important}
+html{width:100vw;height:100vh;overflow:hidden!important;background:#1a1a2e}
+body{position:fixed!important;top:50%!important;left:50%!important;width:100vh!important;height:100vw!important;
+transform:translate(-50%,-50%) rotate(90deg)!important;transform-origin:center center!important;overflow:hidden!important;background:#1a1a2e}
+#alvo{position:fixed;top:5px;left:5px;opacity:0.01;z-index:1;pointer-events:auto;font-size:1px}
+[vw-access-button]{display:none!important}
+[vw]{position:fixed!important;top:50%!important;left:50%!important;transform:translate(-50%,-50%)!important;
+width:100%!important;height:100%!important;z-index:999999!important;display:flex!important;align-items:center!important;justify-content:center!important}
+[vw-plugin-wrapper]{position:relative!important;width:100%!important;height:100%!important;display:flex!important;align-items:center!important;justify-content:center!important}
+[vw] iframe{width:100%!important;height:100%!important;border:none!important;display:block!important;margin:auto!important}
+.vw-plugin-top-wrapper{display:none!important}
+</style></head><body>
+<div id="alvo">Bom dia. Reunião DDS agora.. . Diálogo do dia.. Beba água e coma bem para manter a energia e a concentração no trabalho.. . Segurança.. Houve uma ocorrência ontem.. Rebocadores se chocaram, mas ninguém ficou doente. Lembre-se de sempre manter a segurança em primeiro lugar.. Bandeira segurança: vermelha.. . Qualidade.. D1 zero vírgula um.. Bandeira D1: verde.. FTT noventa porcento.. Bandeira FTT: vermelha.. MVES zero vírgula vinte e cinco.. Bandeira MVES: verde.. Bandeira qualidade: vermelha.. . Produção.. Ontem produção real trinta e seis unidades. Meta trinta e cinco unidades.. Bandeira produção: verde.. . Organização e limpeza cinco s.. Nota oitenta e oito.. Realizar amanhã: Flavio e Adriana.. Bandeira cinco s: vermelha.. . Mensagem da liderança.. Parabéns pela semana boa. Continuem com foco e dedicação.. . Resultado geral.. Bandeira geral: vermelha.. Prioridade qualidade.. . Obrigado. Bom trabalho.</div>
+<div vw class="enabled"><div vw-access-button class="active"></div><div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div></div>
+<script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+<script>
+new window.VLibras.Widget('https://vlibras.gov.br/app');
+window.addEventListener('load',function(){setTimeout(function(){
+var btn=document.querySelector('[vw-access-button]');if(btn)btn.click();
+setTimeout(function(){var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
+var range=document.createRange();range.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+el.dispatchEvent(new MouseEvent('mouseup',{bubbles:true}));el.dispatchEvent(new MouseEvent('click',{bubbles:true}));},15000);},2000);});
+</script></body></html>

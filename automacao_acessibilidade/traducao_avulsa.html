@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <style>
+        * { margin: 0; padding: 0; overflow: hidden; }
+        body { width: 100vw; height: 100vh; background-color: #e2e4e7; }
+        #texto-alvo { position: absolute; top: 0; left: 0; opacity: 0.01; font-size: 20px; }
+        [vw-access-button] { display: none !important; }
+        [vw], .vw-plugin-wrapper, [vw-plugin-wrapper] {
+            position: fixed !important; top: 0 !important; left: 0 !important;
+            width: 100vw !important; height: 100vh !important;
+            max-width: none !important; max-height: none !important;
+            transform: none !important; z-index: 999999 !important; display: block !important;
+        }
+        [vw] iframe { width: 100% !important; height: 100% !important; border: none !important; }
+        .vw-plugin-top-wrapper { display: none !important; }
+    </style>
+</head>
+<body>
+    <div id="texto-alvo">Você conhecer inspeção Audit Body Shop? Vamos aprender agora! Inspeção Audit muito importante para validar qualidade veículos. Onde? Body Shop, carroceria modelos UT, NS, caçamba e chassi. Primeiro foco: procurar amassado, risco e ondulação. Como fazer? Usar inspeção tátil. Inspetor passar mão superfície peça para sentir defeito escondido. Atenção: obrigatório usar luva. Por que? Evitar corte e proteger mão inspetor.. . Depois, verificar integridade partes montadas. Capô, porta e tampa traseira firmes? Precisa estabilidade para evitar acidente. Outro ponto: controle sujeira. Por que? Evitar contaminação banho e-coat e defeito pintura. Também conferir ponto solda. Quantidade e posição exatas garantem estrutura forte.. . Por fim, procurar rebarba. Rebarba perigosa, corta colaborador e atrapalha montagem peças. Resumo: Audit garantir qualidade setor.</div>
+    <div vw class="enabled">
+        <div vw-access-button class="active"></div>
+        <div vw-plugin-wrapper><div class="vw-plugin-top-wrapper"></div></div>
+    </div>
+    <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
+    <script>
+        new window.VLibras.Widget('https://vlibras.gov.br/app');
+        window.addEventListener('load', function() {
+            setTimeout(function() {
+                var btn = document.querySelector('[vw-access-button]');
+                if (btn) btn.click();
+
+                // Aguarda o boneco dar "oi" (12 segundos) e começa a traduzir
+                setTimeout(function() {
+                    const el = document.getElementById('texto-alvo');
+                    var range = document.createRange();
+                    range.selectNodeContents(el);
+                    var sel = window.getSelection();
+                    sel.removeAllRanges();
+                    sel.addRange(range);
+                    
+                    var ev = new MouseEvent('click', { bubbles: true, cancelable: true, view: window });
+                    el.dispatchEvent(ev);
+                }, 12000); 
+            }, 2000);
+        });
+    </script>
+</body>
+</html>

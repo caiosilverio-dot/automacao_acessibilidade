@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Preenchimento Diário DDS - HPE</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: #f4f4f4; padding: 20px; line-height: 1.5; }
+        .header { background: #d32f2f; color: white; padding: 20px; text-align: center; border-radius: 10px; margin-bottom: 20px; }
+        .secao { background: white; margin: 15px 0; padding: 20px; border-radius: 10px; box-shadow: 0 2px 10px rgba(0,0,0,0.1); }
+        .secao h3 { color: #333; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 2px solid; }
+        .grupo { display: flex; flex-wrap: wrap; gap: 10px; margin-bottom: 10px; }
+        label { font-weight: bold; min-width: 150px; }
+        input, select, textarea { padding: 8px; border: 1px solid #ddd; border-radius: 5px; flex: 1; min-width: 120px; }
+        textarea { resize: vertical; height: 60px; max-width: 300px; }
+        .auto-calc { background: #e8f5e8; font-weight: bold; padding: 5px 10px; border-radius: 5px; }
+        button { background: #d32f2f; color: white; padding: 12px 24px; border: none; border-radius: 5px; cursor: pointer; font-size: 16px; margin: 10px 5px; }
+        button:hover { background: #b71c1c; }
+        #preview { background: #f9f9f9; padding: 20px; margin: 20px 0; border-radius: 10px; white-space: pre-wrap; font-family: monospace; min-height: 200px; }
+        .cor-verde { border-left: 5px solid #4caf50; }
+        .cor-azul { border-left: 5px solid #2196f3; }
+        .cor-laranja { border-left: 5px solid #ff9800; }
+        .cor-roxo { border-left: 5px solid #9c27b0; }
+        .cor-amarelo { border-left: 5px solid #ffeb3b; }
+        .cor-cinza { border-left: 5px solid #9e9e9e; }
+        .cor-preto { border-left: 5px solid #333; }
+        @media (max-width: 768px) { .grupo { flex-direction: column; } }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 Preenchimento Diário DDS - HPE</h1>
+        <p id="data-hora"></p>
+    </div>
+
+    <form id="form-dds">
+        <!-- SEÇÃO SEGURANÇA (Verde) -->
+        <div class="secao cor-verde">
+            <h3>🔒 Segurança</h3>
+            <div class="grupo">
+                <label>Nº Ocorrências:</label>
+                <input type="number" id="num_ocorrencias" min="0" max="10" value="0">
+            </div>
+            <div class="grupo">
+                <label>Descrição Ocorrência:</label>
+                <input type="text" id="desc_ocorrencia" maxlength="100" placeholder="Ex: Operador bateu rebocador...">
+            </div>
+        </div>
+
+        <!-- SEÇÃO D1 (Azul) -->
+        <div class="secao cor-azul">
+            <h3>🔵 Qualidade D1</h3>
+            <div class="grupo">
+                <label>Resultado Geral:</label>
+                <input type="number" id="d1_geral" step="0.01" value="0.68">
+                <span class="auto-calc" id="d1_obj_geral"></span>
+            </div>
+            <div class="grupo">
+                <label>Resultado Área:</label>
+                <input type="number" id="d1_area" step="0.01" value="0.58">
+                <span class="auto-calc" id="d1_bandeira_area"></span>
+            </div>
+            <div class="grupo">
+                <label>Item Foco:</label>
+                <input type="text" id="item_qualidade" maxlength="80" value="Faltando limpador do vidro traseiro">
+            </div>
+        </div>
+
+        <!-- SEÇÃO FTT (Laranja) -->
+        <div class="secao cor-laranja">
+            <h3>🟠 FTT</h3>
+            <div class="grupo">
+                <label>Resultado Geral:</label>
+                <input type="number" id="ftt_geral" step="0.01" value="1.00">
+                <span class="auto-calc" id="ftt_obj_geral"></span>
+            </div>
+            <div class="grupo">
+                <label>Resultado Área:</label>
+                <input type="number" id="ftt_area" step="0.01" value="0.58">
+                <span class="auto-calc" id="ftt_bandeira_area"></span>
+            </div>
+            <div class="grupo">
+                <label>Item Foco (se Vermelha):</label>
+                <input type="text" id="item_ftt" maxlength="80" value="Faltando limpador do vidro traseiro">
+            </div>
+        </div>
+
+        <!-- SEÇÃO MVES (Roxo) -->
+        <div class="secao cor-roxo">
+            <h3>🟣 MVES</h3>
+            <div class="grupo">
+                <label>Resultado Geral:</label>
+                <input type="number" id="mves_geral" step="0.1" value="2.2">
+                <span class="auto-calc" id="mves_obj_geral"></span>
+            </div>
+            <div class="grupo">
+                <label>Resultado Área:</label>
+                <input type="number" id="mves_area" step="0.1" value="0.8">
+                <span class="auto-calc" id="mves_bandeira_area"></span>
+            </div>
+            <div class="grupo">
+                <label>Item Foco (se Vermelha):</label>
+                <input type="text" id="item_mves" maxlength="80" value="Coluna de teto amassada">
+            </div>
+        </div>
+
+        <!-- SEÇÃO PRODUÇÃO (Amarelo) -->
+        <div class="secao cor-amarelo">
+            <h3>🚗 Produção</h3>
+            <div class="grupo">
+                <label>Ontem Programados:</label>
+                <input type="number" id="prod_ontem_prog" value="40">
+            </div>
+            <div class="grupo">
+                <label>Ontem Produzidos:</label>
+                <input type="number" id="prod_ontem_real" value="41">
+            </div>
+            <div class="grupo">
+                <label>Hoje Programados:</label>
+                <input type="number" id="prod_hoje_prog" value="41">
+            </div>
+        </div>
+
+        <!-- SEÇÃO ORGANIZAÇÃO (Cinza) -->
+        <div class="secao cor-cinza">
+            <h3>🏭 Organização 5S</h3>
+            <div class="grupo">
+                <label>Nota (%):</label>
+                <input type="number" id="nota_5s" min="0" max="100" value="88">
+            </div>
+            <div class="grupo">
+                <label>Responsáveis Amanhã:</label>
+                <input type="text" id="resp_5s" maxlength="50" value="Marcos e Juliano">
+            </div>
+        </div>
+
+        <!-- SEÇÃO GERAL (Preto) -->
+        <div class="secao cor-preto">
+            <h3>📈 Geral</h3>
+            <div class="grupo">
+                <label>Bandeira Geral:</label>
+                <select id="bandeira_geral">
+                    <option value="Verde">Verde</option>
+                    <option value="Vermelha">Vermelha</option>
+                </select>
+            </div>
+            <div class="grupo">
+                <label>Prioridade Hoje:</label>
+                <select id="prioridade_dia">
+                    <option value="SEGURANÇA">SEGURANÇA</option>
+                    <option value="QUALIDADE">QUALIDADE</option>
+                    <option value="PRODUÇÃO">PRODUÇÃO</option>
+                    <option value="ORGANIZAÇÃO">ORGANIZAÇÃO</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- BOTÕES -->
+        <div style="text-align: center; margin: 30px 0;">
+            <button type="button" onclick="calcularAutomatico()">🔄 Calcular Automático</button>
+            <button type="button" onclick="mostrarPreview()">👁️ Preview Texto</button>
+            <button type="button" onclick="salvarTXT()">💾 Salvar dados_dds.txt</button>
+            <button type="button" onclick="abrirApresentacao()">▶ Abrir Apresentação VLibras</button>
+        </div>
+
+        <!-- PREVIEW -->
+        <div id="preview" style="display: none;"></div>
+    </form>
+
+    <script>
+        // Data/Hora auto
+        document.getElementById('data-hora').innerText = new Date().toLocaleString('pt-BR');
+
+        // THRESHOLDS GENÉRICOS - AJUSTE AQUI OS VALORES REAIS DA HPE!
+        const THRESHOLDS = {
+            // D1: Ajuste para seus padrões (ex: Geral >= 0.70 = Dentro)
+            d1_geral: 0.70,      // Dentro objetivo se >= este valor
+            d1_area: 0.60,        // Bandeira Verde se >= este valor
+            
+            // FTT: Ex: Geral >= 0.95 (95%)
+            ftt_geral: 0.95,
+            ftt_area: 0.90,
+            
+            // MVES: Menor é melhor? Ex: Geral <= 2.0 = Dentro
+            mves_geral: 2.0,      // Dentro se <= este valor (inverta lógica se maior=melhor)
+            mves_area: 1.0,       // Verde se <= este valor
+            
+            // 5S: Pular item se == 100
+            _5s_perfeito: 100
+        };
+
+        function calcularAutomatico() {
+            // D1 Geral
+            const d1Geral = parseFloat(document.getElementById('d1_geral').value);
+            document.getElementById('d1_obj_geral').innerText = d1Geral >= THRESHOLDS.d1_geral ? 'Dentro do objetivo' : 'Fora do objetivo';
+            
+            // D1 Área
+            const d1Area = parseFloat(document.getElementById('d1_area').value);
+            document.getElementById('d1_bandeira_area').innerText = d1Area >= THRESHOLDS.d1_area ? 'Bandeira Verde' : 'Bandeira Vermelha';
+            
+            // FTT Geral/Area (similar)
+            const fttGeral = parseFloat(document.getElementById('ftt_geral').value);
+            document.getElementById('ftt_obj_geral').innerText = fttGeral >= THRESHOLDS.ftt_geral ? 'Dentro do objetivo' : 'Fora do objetivo';
+            const fttArea = parseFloat(document.getElementById('ftt_area').value);
+            document.getElementById('ftt_bandeira_area').innerText = fttArea >= THRESHOLDS.ftt_area ? 'Bandeira Verde' : 'Bandeira Vermelha';
+            
+            // MVES (lógica <= para menor=melhor)
+            const mvesGeral = parseFloat(document.getElementById('mves_geral').value);
+            document.getElementById('mves_obj_geral').innerText = mvesGeral <= THRESHOLDS.mves_geral ? 'Dentro do objetivo' : 'Fora do objetivo';
+            const mvesArea = parseFloat(document.getElementById('mves_area').value);
+            document.getElementById('mves_bandeira_area').innerText = mvesArea <= THRESHOLDS.mves_area ? 'Bandeira Verde' : 'Bandeira Vermelha';
+            
+            alert('Cálculos atualizados! Clique Preview para ver o texto.');
+        }
+
+        function mostrarPreview() {
+            const preview = document.getElementById('preview');
+            preview.style.display = 'block';
+            
+            // Monta EXATAMENTE seu texto com variáveis e condicionais
+            let texto = `Olá bom dia, tenha um ótimo dia de trabalho.
+
+Começando a nossa reunião de hoje.
+
+Nossa Segurança: ${document.getElementById('num_ocorrencias').value == 0 ? 'Não houve ocorrências de segurança.' : `Tivemos ${document.getElementById('num_ocorrencias').value} Ocorrências`}.
+${document.getElementById('num_ocorrencias').value > 0 ? document.getElementById('desc_ocorrencia').value : ''}
+
+Nossa Qualidade:
+
+D1
+resultado geral:${document.getElementById('d1_geral').value} "${document.getElementById('d1_obj_geral').innerText}".
+resultado da Área:${document.getElementById('d1_area').value} ${document.getElementById('d1_bandeira_area').innerText}
+Hoje vamos trabalhar o item ${document.getElementById('item_qualidade').value}.
+
+FTT:
+
+resultado geral:${document.getElementById('ftt_geral').value} "${document.getElementById('ftt_obj_geral').innerText}".
+resultado da Área:${document.getElementById('ftt_area').value} ${document.getElementById('ftt_bandeira_area').innerText}
+${document.getElementById('ftt_bandeira_area').innerText.includes('Vermelha') ? `Hoje vamos trabalhar o item ${document.getElementById('item_ftt').value}.` : ''}
+
+Mves:
+
+resultado geral:${document.getElementById('mves_geral').value} "${document.getElementById('mves_obj_geral').innerText}".
+resultado da Área:${document.getElementById('mves_area').value} ${document.getElementById('mves_bandeira_area').innerText}
+${document.getElementById('mves_bandeira_area').innerText.includes('Vermelha') ? `Hoje vamos trabalhar o item ${document.getElementById('item_mves').value}.` : ''}
+
+Nossa Produção de veículos:
+
+Ontem foram programados ${document.getElementById('prod_ontem_prog').value} Carros e produzidos ${document.getElementById('prod_ontem_real').value} carros.
+
+para o dia de hoje estão programados ${document.getElementById('prod_hoje_prog').value} carros.
+
+Organização da área:
+
+Nossa área teve uma nota de ${document.getElementById('nota_5s').value}% ${document.getElementById('nota_5s').value == 100 ? '' : `
+item: Peças no chão, precisamos coletar o que cair no chão.
+
+Amanhã para fazer o 5s : ${document.getElementById('resp_5s').value}.`}
+
+Ferramentas:
+
+Algum problema com máquina?
+
+Etiquetas das maquinas estão boas?
+
+Vamos Olha o vencimento da máquina.
+
+De uma forma geral, vocês precisam de alguma ajuda?
+
+A bandeira geral da área hoje é ${document.getElementById('bandeira_geral').value}
+
+A prioridade hoje será ${document.getElementById('prioridade_dia').value}`;
+
+            preview.innerText = texto;
+            preview.scrollIntoView({ behavior: 'smooth' });
+        }
+
+        function salvarTXT() {
+            mostrarPreview(); // Gera preview primeiro
+            const textoFinal = document.getElementById('preview').innerText;
+            
+            const blob = new Blob([textoFinal], { type: 'text/plain;charset=utf-8' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = 'dados_dds.txt';
+            link.click();
+            
+            alert('Arquivo dados_dds.txt baixado! Mova para a pasta automacao_acessibilidade.');
+        }
+
+        function abrirApresentacao() {
+            if (confirm('Abrir Apresentação VLibras? Certifique-se que dados_dds.txt está salvo.')) {
+                // Ajuste o caminho do seu Python aqui
+                window.location.href = 'file:///C:/Users/fa811254/OneDrive%20-%20HPE%20Automotores%20do%20Brasil%20Ltda/%C3%81rea%20de%20Trabalho/automacao_acessibilidade/gerar_dds.py'; // Não funciona direto; rode manual ou integre
+                alert('Rode manualmente: python gerar_dds.py na pasta!');
+            }
+        }
+    </script>
+</body>
+</html>
