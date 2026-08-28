@@ -20,13 +20,33 @@ var btn=root&&root.shadowRoot?root.shadowRoot.querySelector('button[aria-label="
 if(btn){btn.click();return true;}
 return false;
 }
+function ocuparTela(){
+var root=document.getElementById('vlibras-app-root');
+var sr=root?root.shadowRoot:null;
+var appDiv=sr?sr.querySelector('#vlibras-app'):null;
+if(!appDiv)return false;
+var rect=appDiv.getBoundingClientRect();
+if(!rect.width)return false;
+var escala=(window.innerWidth/rect.width)*0.98;
+if(escala<0.9||escala>3.5)return false;
+appDiv.style.position='fixed';
+appDiv.style.top='0';
+appDiv.style.left='50%';
+appDiv.style.right='auto';
+appDiv.style.bottom='auto';
+appDiv.style.margin='0';
+appDiv.style.transformOrigin='top center';
+appDiv.style.transform='translateX(-50%) scale('+escala+')';
+return true;
+}
 window.addEventListener('load',function(){
-var tentativas=0,abriu=false,expandiu=false;
+var tentativas=0,abriu=false,expandiu=false,ocupou=false,expandiuEm=0;
 var esperaBotao=setInterval(function(){
 tentativas++;
 if(!abriu)abriu=abrirBoneco();
-if(abriu&&!expandiu)expandiu=expandirBoneco();
-if((abriu&&expandiu)||tentativas>60){clearInterval(esperaBotao);}
+if(abriu&&!expandiu){expandiu=expandirBoneco();if(expandiu)expandiuEm=Date.now();}
+if(expandiu&&!ocupou&&Date.now()-expandiuEm>700)ocupou=ocuparTela();
+if((abriu&&expandiu&&ocupou)||tentativas>80){clearInterval(esperaBotao);}
 },250);
 setTimeout(function(){
 var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
