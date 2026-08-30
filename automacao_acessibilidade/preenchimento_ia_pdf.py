@@ -44,6 +44,7 @@ PASTA_ATUAL = (
 )
 CAMINHO_TXT      = os.path.join(PASTA_ATUAL, "dados_dds.txt")
 CAMINHO_HTML     = os.path.join(PASTA_ATUAL, "resumo_dds_app.html")
+CAMINHO_HTML_BONECO = os.path.join(PASTA_ATUAL, "resumo_dds_boneco.html")
 CAMINHO_CONFIG   = os.path.join(PASTA_ATUAL, "config.json")
 CAMINHO_CACHE    = os.path.join(PASTA_ATUAL, ".ia_cache.json")
 CAMINHO_AUTOSAVE = os.path.join(PASTA_ATUAL, ".autosave.json")
@@ -426,7 +427,10 @@ def rodar_apresentacao_libras():
     with open(CAMINHO_TXT, "r", encoding="utf-8") as f:
         texto = f.read().replace("\n", ". ").replace('"', '&quot;').replace("'", "&#39;")
 
-    html = f"""<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>HPE-DDS LIBRAS</title>
+    # Pagina interna: contem o widget do VLibras de verdade. Fica numa janela
+    # "estreita" (nested_width) para que o botao "Expandir" do proprio widget
+    # produza um cartao com o corpo inteiro do boneco bem proporcionado.
+    html_boneco = f"""<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>Boneco</title>
 <style>
 *{{margin:0!important;padding:0!important;box-sizing:border-box!important}}
 html,body{{width:100vw;height:100vh;overflow:hidden!important;background:#1a1a2e}}
@@ -448,41 +452,54 @@ var btn=root&&root.shadowRoot?root.shadowRoot.querySelector('button[aria-label="
 if(btn){{btn.click();return true;}}
 return false;
 }}
-function ocuparTela(){{
-var root=document.getElementById('vlibras-app-root');
-var sr=root?root.shadowRoot:null;
-var appDiv=sr?sr.querySelector('#vlibras-app'):null;
-if(!appDiv)return false;
-var rect=appDiv.getBoundingClientRect();
-if(!rect.width)return false;
-var escala=(window.innerWidth/rect.width)*0.98;
-if(escala<0.9||escala>3.5)return false;
-appDiv.style.position='fixed';
-appDiv.style.top='0';
-appDiv.style.left='50%';
-appDiv.style.right='auto';
-appDiv.style.bottom='auto';
-appDiv.style.margin='0';
-appDiv.style.transformOrigin='top center';
-appDiv.style.transform='translateX(-50%) scale('+escala+')';
-return true;
-}}
 window.addEventListener('load',function(){{
-var tentativas=0,abriu=false,expandiu=false,ocupou=false,expandiuEm=0;
+var tentativas=0,abriu=false,expandiu=false;
 var esperaBotao=setInterval(function(){{
 tentativas++;
 if(!abriu)abriu=abrirBoneco();
-if(abriu&&!expandiu){{expandiu=expandirBoneco();if(expandiu)expandiuEm=Date.now();}}
-if(expandiu&&!ocupou&&Date.now()-expandiuEm>700)ocupou=ocuparTela();
-if((abriu&&expandiu&&ocupou)||tentativas>80){{clearInterval(esperaBotao);}}
+if(abriu&&!expandiu)expandiu=expandirBoneco();
+if((abriu&&expandiu)||tentativas>80){{clearInterval(esperaBotao);}}
 }},250);
 setTimeout(function(){{
 var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
 var range=document.createRange();range.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
 el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}},38000);}});
 </script></body></html>"""
+    with open(CAMINHO_HTML_BONECO, "w", encoding="utf-8") as f:
+        f.write(html_boneco)
+
+    # Pagina externa: a que o navegador realmente abre. Ela hospeda a pagina
+    # interna dentro de um iframe estreito (pre-rotacionado) e depois usa
+    # CSS para girar 90 graus e ampliar esse iframe até preencher a tela
+    # real inteira. Isso e o que faz o boneco aparecer deitado (pes para um
+    # lado, cabeca para o outro) e, quando o monitor fisico e girado sem
+    # mexer na configuracao do Windows, o boneco aparece de pe e em tela
+    # cheia para quem esta assistindo.
+    html_externo = """<!DOCTYPE html><html lang="pt-BR"><head><meta charset="UTF-8"><title>HPE-DDS LIBRAS</title>
+<style>
+*{margin:0!important;padding:0!important;box-sizing:border-box!important}
+html,body{width:100vw;height:100vh;overflow:hidden!important;background:#1a1a2e}
+#frame{position:fixed;top:0;left:0;border:none;background:#1a1a2e;}
+</style></head><body>
+<iframe id="frame" src="resumo_dds_boneco.html"></iframe>
+<script>
+function ajustar(){
+var RW = window.innerWidth, RH = window.innerHeight;
+var nestedWidth = 660;
+var nestedHeight = nestedWidth * (RW/RH);
+var scale = RH / nestedWidth;
+var f = document.getElementById('frame');
+f.style.width = nestedWidth+'px';
+f.style.height = nestedHeight+'px';
+f.style.transformOrigin = 'top left';
+f.style.transform = 'translateX('+RW+'px) rotate(90deg) scale('+scale+')';
+}
+ajustar();
+window.addEventListener('resize', ajustar);
+</script>
+</body></html>"""
     with open(CAMINHO_HTML, "w", encoding="utf-8") as f:
-        f.write(html)
+        f.write(html_externo)
     webbrowser.open(f'file:///{os.path.abspath(CAMINHO_HTML)}')
 
 # ==========================================
