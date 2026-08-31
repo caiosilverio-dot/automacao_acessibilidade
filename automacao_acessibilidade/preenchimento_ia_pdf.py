@@ -452,18 +452,28 @@ var btn=root&&root.shadowRoot?root.shadowRoot.querySelector('button[aria-label="
 if(btn){{btn.click();return true;}}
 return false;
 }}
+function pularBoneco(){{
+var root=document.getElementById('vlibras-app-root');
+var sr=root&&root.shadowRoot?root.shadowRoot:null;
+if(!sr)return false;
+var btns=Array.from(sr.querySelectorAll('button'));
+var btn=btns.find(function(b){{return b.textContent.trim()==='Pular';}});
+if(btn){{btn.click();return true;}}
+return false;
+}}
 window.addEventListener('load',function(){{
 var tentativas=0,abriu=false,expandiu=false;
 var esperaBotao=setInterval(function(){{
 tentativas++;
 if(!abriu)abriu=abrirBoneco();
 if(abriu&&!expandiu)expandiu=expandirBoneco();
-if((abriu&&expandiu)||tentativas>80){{clearInterval(esperaBotao);}}
+if(expandiu)pularBoneco();
+if(tentativas>160){{clearInterval(esperaBotao);}}
 }},250);
 setTimeout(function(){{
 var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
 var range=document.createRange();range.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
-el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}},38000);}});
+el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}},40000);}});
 </script></body></html>"""
     with open(CAMINHO_HTML_BONECO, "w", encoding="utf-8") as f:
         f.write(html_boneco)
@@ -479,20 +489,26 @@ el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(ne
 <style>
 *{margin:0!important;padding:0!important;box-sizing:border-box!important}
 html,body{width:100vw;height:100vh;overflow:hidden!important;background:#1a1a2e}
-#frame{position:fixed;top:0;left:0;border:none;background:#1a1a2e;}
+#frame{position:fixed;border:none;background:#1a1a2e;}
 </style></head><body>
 <iframe id="frame" src="resumo_dds_boneco.html"></iframe>
 <script>
 function ajustar(){
 var RW = window.innerWidth, RH = window.innerHeight;
-var nestedWidth = 660;
-var nestedHeight = nestedWidth * (RW/RH);
-var scale = RH / nestedWidth;
+// Tamanho fixo (em pixels) do cartao "Expandir" do proprio widget do VLibras.
+// Nao e proporcional -- o widget sempre renderiza nesse tamanho exato,
+// entao usamos esses mesmos valores aqui para nao sobrar nem faltar espaco.
+var cardW = 576, cardH = 852.8;
+// "Cover": amplia o suficiente para cobrir a tela toda em qualquer
+// resolucao, mesmo que isso corte um pouco as bordas do cartao.
+var scale = Math.max(RW/cardH, RH/cardW);
 var f = document.getElementById('frame');
-f.style.width = nestedWidth+'px';
-f.style.height = nestedHeight+'px';
-f.style.transformOrigin = 'top left';
-f.style.transform = 'translateX('+RW+'px) rotate(90deg) scale('+scale+')';
+f.style.width = cardW+'px';
+f.style.height = cardH+'px';
+f.style.top = '50%';
+f.style.left = '50%';
+f.style.transformOrigin = 'center center';
+f.style.transform = 'translate(-50%,-50%) rotate(90deg) scale('+scale+')';
 }
 ajustar();
 window.addEventListener('resize', ajustar);
