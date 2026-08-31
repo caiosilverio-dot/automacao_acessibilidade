@@ -22,6 +22,12 @@ except ImportError:
         TEM_PYMUPDF = False
     except ImportError:
         TEM_PYMUPDF = None
+
+try:
+    import speech_recognition as sr
+    TEM_SPEECH_RECOGNITION = True
+except ImportError:
+    TEM_SPEECH_RECOGNITION = False
 def resource_path(rel: str) -> str:
     """Retorna caminho do recurso (funciona no .exe e no .py)."""
     base = getattr(sys, '_MEIPASS', os.path.dirname(os.path.abspath(__file__)))
@@ -420,12 +426,17 @@ def extrair_mensagem_pdf(caminho_pdf: str):
 # ==========================================
 # 7. AVATAR LIBRAS HTML
 # ==========================================
-def rodar_apresentacao_libras():
-    if not os.path.exists(CAMINHO_TXT):
-        messagebox.showwarning("Aviso", "Arquivo de texto não encontrado.")
-        return
-    with open(CAMINHO_TXT, "r", encoding="utf-8") as f:
-        texto = f.read().replace("\n", ". ").replace('"', '&quot;').replace("'", "&#39;")
+def rodar_apresentacao_libras(texto_bruto=None):
+    """Abre o boneco de Libras. Se texto_bruto vier vazio, le o dados_dds.txt
+    (fluxo do DDS diario); se vier preenchido, apresenta esse texto direto
+    (usado pelo tradutor de voz)."""
+    if texto_bruto is None:
+        if not os.path.exists(CAMINHO_TXT):
+            messagebox.showwarning("Aviso", "Arquivo de texto não encontrado.")
+            return
+        with open(CAMINHO_TXT, "r", encoding="utf-8") as f:
+            texto_bruto = f.read()
+    texto = texto_bruto.replace("\n", ". ").replace('"', '&quot;').replace("'", "&#39;")
 
     # Pagina interna: contem o widget do VLibras de verdade. Fica numa janela
     # "estreita" (nested_width) para que o botao "Expandir" do proprio widget
@@ -560,6 +571,8 @@ class DDSAppIA(ctk.CTk):
 
     def ao_fechar(self):
         self._salvar_autosave()
+        if getattr(self, '_ouvindo_voz', False):
+            self._parar_gravacao_voz()
         self.quit(); self.destroy(); sys.exit(0)
 
     # ------------------------------------------
@@ -594,8 +607,16 @@ class DDSAppIA(ctk.CTk):
         self.progresso.pack(side="right", padx=10, pady=8)
         self.progresso.set(0)
 
-        self.scroll = ctk.CTkScrollableFrame(self, fg_color="transparent")
-        self.scroll.pack(fill="both", expand=True, padx=10, pady=10)
+        # Abas: DDS diário e Tradutor de Voz
+        self.tabview = ctk.CTkTabview(self)
+        self.tabview.pack(fill="both", expand=True, padx=10, pady=10)
+        tab_dds = self.tabview.add("📋 DDS")
+        tab_voz = self.tabview.add("🎤 Tradutor de Voz")
+
+        self.scroll = ctk.CTkScrollableFrame(tab_dds, fg_color="transparent")
+        self.scroll.pack(fill="both", expand=True)
+
+        self._criar_aba_voz(tab_voz)
 
         # Seção 0 — PDF
         self._secao("0️⃣  DIÁLOGO DE SEGURANÇA DO DIA (PDF)")
@@ -685,6 +706,49 @@ class DDSAppIA(ctk.CTk):
         self.preview = ctk.CTkTextbox(self.scroll, height=240, fg_color="#fffacd",
                                       text_color="#1a1a1a", font=("Courier New", 11))
         self.preview.pack(fill="x", padx=20, pady=(0, 20))
+
+    def _criar_aba_voz(self, aba):
+        """Tradutor de voz: ouve quem esta falando, transcreve o audio em
+        texto e apresenta esse texto pro boneco de Libras sinalizar --
+        util para uma conversa entre um ouvinte e uma pessoa surda."""
+        ctk.CTkLabel(aba, text="🎤 TRADUTOR DE VOZ PARA LIBRAS",
+                     font=("Segoe UI", 15, "bold"), text_color="#d32f2f").pack(anchor="w", padx=20, pady=(15, 2))
+        ctk.CTkLabel(aba,
+            text="Clique em Gravar, peça para a pessoa falar perto do microfone.\n"
+                 "A fala vai sendo transcrita abaixo. Quando estiver pronto, clique em Apresentar.",
+            justify="left", text_color="#555", font=("Segoe UI", 11)).pack(anchor="w", padx=20, pady=(0, 10))
+
+        if not TEM_SPEECH_RECOGNITION:
+            ctk.CTkLabel(aba,
+                text="⚠️ Biblioteca de reconhecimento de voz não encontrada nesta instalação.\n"
+                     "(pip install SpeechRecognition PyAudio)",
+                text_color="#d32f2f", font=("Segoe UI", 11, "bold")).pack(anchor="w", padx=20, pady=10)
+
+        f_btns_voz = ctk.CTkFrame(aba, fg_color="transparent")
+        f_btns_voz.pack(pady=10)
+        self.btn_gravar_voz = ctk.CTkButton(f_btns_voz, text="🎤 GRAVAR", command=self._iniciar_gravacao_voz,
+            fg_color="#e53935", width=170, state="normal" if TEM_SPEECH_RECOGNITION else "disabled")
+        self.btn_gravar_voz.pack(side="left", padx=5)
+        self.btn_parar_voz = ctk.CTkButton(f_btns_voz, text="⏹️ PARAR", command=self._parar_gravacao_voz,
+            fg_color="#9e9e9e", width=140, state="disabled")
+        self.btn_parar_voz.pack(side="left", padx=5)
+        self.btn_limpar_voz = ctk.CTkButton(f_btns_voz, text="🗑️ LIMPAR", command=self._limpar_texto_voz,
+            fg_color="#607d8b", width=140)
+        self.btn_limpar_voz.pack(side="left", padx=5)
+
+        self.lbl_status_voz = ctk.CTkLabel(aba, text="Pronto para gravar.", text_color="#333", font=("Segoe UI", 11))
+        self.lbl_status_voz.pack(pady=(0, 5))
+
+        ctk.CTkLabel(aba, text="📝 TEXTO TRANSCRITO (EDITÁVEL)",
+                     font=("Segoe UI", 12, "bold"), text_color="#d32f2f").pack(anchor="w", padx=20, pady=(10, 2))
+        self.txt_voz = ctk.CTkTextbox(aba, height=300, fg_color="#fffacd",
+                                       text_color="#1a1a1a", font=("Segoe UI", 12))
+        self.txt_voz.pack(fill="both", expand=True, padx=20, pady=(0, 10))
+
+        self.btn_apresentar_voz = ctk.CTkButton(aba, text="🧑‍🤝‍🧑 APRESENTAR EM LIBRAS",
+            command=self._apresentar_voz, fg_color="#4caf50", width=260, height=40,
+            font=("Segoe UI", 12, "bold"))
+        self.btn_apresentar_voz.pack(pady=(0, 15))
 
     def _secao(self, texto: str):
         ctk.CTkLabel(self.scroll, text=texto, font=("Segoe UI", 13, "bold"),
@@ -968,6 +1032,83 @@ class DDSAppIA(ctk.CTk):
         self._status("💾 Salvo. Abrindo apresentação...", "#2e7d32")
         messagebox.showinfo("✅ Salvo!", "DDS salvo!\nO navegador vai abrir e o boneco de Libras aparece sozinho.\n\nO primeiro carregamento do avatar pode levar até 40 segundos.")
         rodar_apresentacao_libras()
+
+    # ------------------------------------------
+    # TRADUTOR DE VOZ (fala do ouvinte -> texto -> boneco)
+    # ------------------------------------------
+    def _status_voz(self, msg: str, cor: str = "#333"):
+        self.lbl_status_voz.configure(text=msg, text_color=cor)
+
+    def _iniciar_gravacao_voz(self):
+        if not TEM_SPEECH_RECOGNITION:
+            messagebox.showerror("Erro", "Biblioteca de reconhecimento de voz não está instalada.")
+            return
+        if getattr(self, '_ouvindo_voz', False):
+            return
+        try:
+            self._sr_recognizer = sr.Recognizer()
+            self._sr_mic = sr.Microphone()
+            with self._sr_mic as source:
+                self._sr_recognizer.adjust_for_ambient_noise(source, duration=0.5)
+        except Exception as e:
+            log.error(f"Microfone: {e}")
+            messagebox.showerror("Erro no microfone", f"Não foi possível acessar o microfone:\n{e}")
+            return
+
+        self._ouvindo_voz = True
+        self.btn_gravar_voz.configure(state="disabled")
+        self.btn_parar_voz.configure(state="normal")
+        self._status_voz("🎤 Ouvindo... peça para a pessoa falar perto do microfone.", "#1976d2")
+        log.info("Tradutor de voz: gravação iniciada")
+
+        def callback(recognizer, audio):
+            try:
+                texto = recognizer.recognize_google(audio, language="pt-BR")
+                if texto:
+                    self.after(0, self._adicionar_texto_voz, texto)
+            except sr.UnknownValueError:
+                pass  # trecho sem fala reconhecível, ignora e continua ouvindo
+            except sr.RequestError as e:
+                log.error(f"Reconhecimento de voz (rede): {e}")
+                self.after(0, self._status_voz, "❌ Falha de conexão no reconhecimento de voz.", "#d32f2f")
+
+        self._parar_ouvindo = self._sr_recognizer.listen_in_background(
+            self._sr_mic, callback, phrase_time_limit=8)
+
+    def _parar_gravacao_voz(self):
+        if not getattr(self, '_ouvindo_voz', False):
+            return
+        self._ouvindo_voz = False
+        parar = getattr(self, '_parar_ouvindo', None)
+        if parar:
+            parar(wait_for_stop=False)
+        self.btn_gravar_voz.configure(state="normal")
+        self.btn_parar_voz.configure(state="disabled")
+        self._status_voz("⏹️ Gravação parada.", "#333")
+        log.info("Tradutor de voz: gravação parada")
+
+    def _adicionar_texto_voz(self, texto: str):
+        atual = self.txt_voz.get("0.0", "end").strip()
+        novo = f"{atual} {texto}".strip() if atual else texto
+        self.txt_voz.delete("0.0", "end")
+        self.txt_voz.insert("0.0", novo)
+        self._status_voz("🎤 Ouvindo... (texto atualizado)", "#1976d2")
+
+    def _limpar_texto_voz(self):
+        self.txt_voz.delete("0.0", "end")
+        self._status_voz("Texto limpo. Pronto para gravar.", "#333")
+
+    def _apresentar_voz(self):
+        texto = self.txt_voz.get("0.0", "end").strip()
+        if len(texto) < 3:
+            messagebox.showwarning("Aviso", "Ainda não há texto transcrito para apresentar.")
+            return
+        if getattr(self, '_ouvindo_voz', False):
+            self._parar_gravacao_voz()
+        log.info(f"Tradutor de voz: apresentando ({len(texto)} chars)")
+        self._status_voz("💬 Abrindo o boneco para apresentar...", "#2e7d32")
+        rodar_apresentacao_libras(texto)
+
 def garantir_modelo_ollama():
     """Cria o modelo narrador-dds no Ollama se ainda não existir."""
     try:
