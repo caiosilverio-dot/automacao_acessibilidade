@@ -508,6 +508,17 @@ if(despachado||tentativas>200){{clearInterval(esperaBotao);}}
 // que o texto seja lido mesmo assim depois de um tempo generoso.
 setTimeout(function(){{if(!despachado){{despachado=true;disparar();}}}},45000);
 }});
+// Se esta janela for tapada/minimizada durante a apresentacao (por outra
+// janela por cima, notificacao do Windows, etc.), o Chrome/Edge marca a
+// pagina como oculta e o proprio VLibras pausa o boneco no meio da frase --
+// era a causa do boneco "cortar" o que estava falando. Assim que a janela
+// volta a ficar visivel, retomamos de onde parou (sem reiniciar a frase).
+document.addEventListener('visibilitychange',function(){{
+if(document.visibilityState==='visible'){{
+var v=window.vlibras;
+if(v&&v.status==='paused'&&!v.isPausedByUser){{v.play();}}
+}}
+}});
 </script></body></html>"""
     with open(CAMINHO_HTML_BONECO, "w", encoding="utf-8") as f:
         f.write(html_boneco)
@@ -1031,6 +1042,11 @@ class DDSAppIA(ctk.CTk):
         log.info(f"DDS salvo ({len(txt)} chars)")
         self._status("💾 Salvo. Abrindo apresentação...", "#2e7d32")
         messagebox.showinfo("✅ Salvo!", "DDS salvo!\nO navegador vai abrir e o boneco de Libras aparece sozinho.\n\nO primeiro carregamento do avatar pode levar até 40 segundos.")
+        # Minimiza esta janela antes de abrir o navegador: se ela ficar por
+        # cima ou "tapando" a janela do boneco, o Chrome/Edge trata a pagina
+        # como oculta e PAUSA a animacao do avatar no meio da frase (era a
+        # causa do boneco "cortar" o que estava falando).
+        self.iconify()
         rodar_apresentacao_libras()
 
     # ------------------------------------------
@@ -1107,6 +1123,9 @@ class DDSAppIA(ctk.CTk):
             self._parar_gravacao_voz()
         log.info(f"Tradutor de voz: apresentando ({len(texto)} chars)")
         self._status_voz("💬 Abrindo o boneco para apresentar...", "#2e7d32")
+        # Ver comentario em _salvar_e_executar: minimizar evita que esta
+        # janela tape a do boneco e faca o Chrome/Edge pausar a animacao.
+        self.iconify()
         rodar_apresentacao_libras(texto)
 
 def garantir_modelo_ollama():
