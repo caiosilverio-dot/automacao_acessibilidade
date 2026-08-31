@@ -461,19 +461,42 @@ var btn=btns.find(function(b){{return b.textContent.trim()==='Pular';}});
 if(btn){{btn.click();return true;}}
 return false;
 }}
+function avatarPronto(){{
+// O atributo data-status do widget fica "idle" poucos segundos apos abrir,
+// bem antes do avatar 3D (pesado) realmente terminar de carregar -- entao
+// nao serve como sinal. O iframe do avatar, porem, comeca com opacity:0 e
+// so vira opacity:1 quando ele de fato terminou de carregar e esta pronto
+// para receber texto. Usamos isso para nao esperar mais tempo que o
+// necessario antes de mandar o texto do DDS.
+var root=document.getElementById('vlibras-app-root');
+var sr=root&&root.shadowRoot?root.shadowRoot:null;
+if(!sr)return false;
+var iframe=sr.querySelector('iframe[title="vlibras-player"]');
+if(!iframe)return false;
+return parseFloat(getComputedStyle(iframe).opacity)>=1;
+}}
 window.addEventListener('load',function(){{
-var tentativas=0,abriu=false,expandiu=false;
+var tentativas=0,abriu=false,expandiu=false,prontoCount=0,despachado=false;
+function disparar(){{
+var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
+var range=document.createRange();range.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
+el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));
+}}
 var esperaBotao=setInterval(function(){{
 tentativas++;
 if(!abriu)abriu=abrirBoneco();
 if(abriu&&!expandiu)expandiu=expandirBoneco();
 if(expandiu)pularBoneco();
-if(tentativas>160){{clearInterval(esperaBotao);}}
+if(expandiu&&!despachado){{
+if(avatarPronto()){{prontoCount++;}}else{{prontoCount=0;}}
+if(prontoCount>=4){{despachado=true;disparar();}}
+}}
+if(despachado||tentativas>200){{clearInterval(esperaBotao);}}
 }},250);
-setTimeout(function(){{
-var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
-var range=document.createRange();range.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
-el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));}},40000);}});
+// Rede de seguranca: se por algum motivo a deteccao acima falhar, garante
+// que o texto seja lido mesmo assim depois de um tempo generoso.
+setTimeout(function(){{if(!despachado){{despachado=true;disparar();}}}},45000);
+}});
 </script></body></html>"""
     with open(CAMINHO_HTML_BONECO, "w", encoding="utf-8") as f:
         f.write(html_boneco)
