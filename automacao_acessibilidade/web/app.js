@@ -410,6 +410,14 @@
   });
 
   // ---------------------------------------------------------
+  // HEARTBEAT (avisa o backend que a aba ainda está aberta; se parar de
+  // chegar — aba fechada — o app se encerra sozinho pouco depois)
+  // ---------------------------------------------------------
+  function enviarHeartbeat() {
+    fetch("/api/heartbeat", { method: "POST" }).catch(() => {});
+  }
+
+  // ---------------------------------------------------------
   // INICIALIZAÇÃO
   // ---------------------------------------------------------
   (async function iniciar() {
@@ -419,5 +427,7 @@
     atualizarBandeiras();
     setInterval(salvarAutosave, autosaveSegundos * 1000);
     window.addEventListener("beforeunload", salvarAutosave);
+    enviarHeartbeat();
+    setInterval(enviarHeartbeat, 4000);
   })();
 })();

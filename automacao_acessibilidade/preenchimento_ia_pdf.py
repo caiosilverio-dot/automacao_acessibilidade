@@ -562,6 +562,11 @@ f.style.transform = 'translate(-50%,-50%) rotate(90deg) scale('+scale+')';
 }
 ajustar();
 window.addEventListener('resize', ajustar);
+// Mantem o app "vivo" enquanto esta pagina (a apresentacao do boneco)
+// estiver aberta -- mesmo esquema de heartbeat do formulario.
+function enviarHeartbeat(){fetch('/api/heartbeat',{method:'POST'}).catch(function(){});}
+enviarHeartbeat();
+setInterval(enviarHeartbeat, 4000);
 </script>
 </body></html>"""
     with open(CAMINHO_HTML, "w", encoding="utf-8") as f:
@@ -574,6 +579,15 @@ window.addEventListener('resize', ajustar);
 WEB_DIR = resource_path("web")
 
 app = Flask(__name__)
+
+# Sem janela pra fechar (a interface e uma aba de navegador comum), o
+# processo nao tinha como saber que o usuario "fechou o app" -- ficava
+# rodando escondido pra sempre e travava o .exe pra copiar/mover. As paginas
+# (formulario e apresentacao do boneco) mandam um "sinal de vida" a cada
+# poucos segundos; se ele parar de chegar (aba fechada), o servidor se
+# encerra sozinho pouco depois.
+ULTIMO_HEARTBEAT = {"ts": time.time()}
+HEARTBEAT_TIMEOUT_SEGUNDOS = 25
 
 CAMPOS_OTIMIZAVEIS = {
     'msg_pdf': 400, 'desc_ocorrencia': 150, 'item_d1': 80,
@@ -678,6 +692,12 @@ def apresentacao_asset(nome):
 # ------------------------------------------
 # ROTAS — API
 # ------------------------------------------
+@app.post("/api/heartbeat")
+def api_heartbeat():
+    ULTIMO_HEARTBEAT["ts"] = time.time()
+    return jsonify({"ok": True})
+
+
 @app.get("/api/status")
 def api_status():
     ok, msg = ollama_online()
@@ -843,10 +863,22 @@ def _abrir_navegador():
     time.sleep(1.2)
     webbrowser.open(f'http://127.0.0.1:{PORTA_WEB}')
 
+def _vigiar_navegador_fechado():
+    """Encerra o processo se nenhuma aba do app mandar heartbeat por um
+    tempo (aba/navegador fechado) -- sem isso o app ficava rodando
+    escondido pra sempre e travava o .exe pra copiar/mover."""
+    ULTIMO_HEARTBEAT["ts"] = time.time()
+    while True:
+        time.sleep(3)
+        if time.time() - ULTIMO_HEARTBEAT["ts"] > HEARTBEAT_TIMEOUT_SEGUNDOS:
+            log.info("Nenhum sinal do navegador — encerrando aplicação.")
+            os._exit(0)
+
 if __name__ == "__main__":
     try:
         garantir_modelo_ollama()
         threading.Thread(target=_abrir_navegador, daemon=True).start()
+        threading.Thread(target=_vigiar_navegador_fechado, daemon=True).start()
         app.run(host="127.0.0.1", port=PORTA_WEB, debug=False, use_reloader=False, threaded=True)
     except Exception:
         with open(os.path.join(PASTA_ATUAL, "erro_log.txt"), "w", encoding="utf-8") as f:
