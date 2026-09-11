@@ -6,9 +6,20 @@
 
   const fields = () => $$("[data-field]");
 
+  // Campos numéricos aceitam "," ou "." como separador decimal (o teclado
+  // numérico do Windows em pt-BR manda vírgula) — normaliza para ponto, que
+  // é o que Python/JSON esperam.
+  function normalizarNumero(v) {
+    return String(v ?? "").trim().replace(",", ".");
+  }
+
   function coletarDados() {
     const out = {};
-    fields().forEach((el) => { out[el.dataset.field] = el.value; });
+    fields().forEach((el) => {
+      out[el.dataset.field] = el.classList.contains("field-num")
+        ? normalizarNumero(el.value)
+        : el.value;
+    });
     return out;
   }
 
@@ -114,6 +125,14 @@
   }
 
   $$(".live-flag").forEach((el) => el.addEventListener("input", agendarAtualizacaoBandeiras));
+
+  // Ao sair do campo, normaliza "5,0" -> "5.0" na tela para confirmar
+  // visualmente que a vírgula foi aceita.
+  $$(".field-num").forEach((el) => {
+    el.addEventListener("blur", () => {
+      if (el.value.includes(",")) el.value = normalizarNumero(el.value);
+    });
+  });
 
   // ---------------------------------------------------------
   // AUTOSAVE

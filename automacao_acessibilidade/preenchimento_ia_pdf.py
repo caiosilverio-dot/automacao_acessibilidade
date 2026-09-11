@@ -576,6 +576,14 @@ CAMPOS_OTIMIZAVEIS = {
 }
 
 
+def _float_br(v) -> float:
+    """float() tolerante a vírgula decimal (ex: '5,0' -> 5.0), já que o
+    teclado numérico do Windows em pt-BR digita vírgula."""
+    if v is None or v == '':
+        return 0.0
+    return float(str(v).strip().replace(',', '.'))
+
+
 def montar_dados_do_form(raw: dict):
     """Converte o payload bruto vindo do formulário web nos mesmos tipos que
     a lógica de negócio (calcular_bandeiras / montar_json_dds) espera."""
@@ -588,23 +596,22 @@ def montar_dados_do_form(raw: dict):
             'item_mves':        limpar_texto_campo(raw.get('item_mves', ''), 100),
             'desc_5s':          limpar_texto_campo(raw.get('desc_5s', ''), 200),
             'prio':             raw.get('prio') or 'SEGURANÇA',
-            'num_ocorrencias':  int(float(raw.get('num_ocorrencias', 0) or 0)),
-            'd1_g':   float(raw.get('d1_g', 0) or 0),   'd1_a':   float(raw.get('d1_a', 0) or 0),
-            'ftt_g':  float(raw.get('ftt_g', 0) or 0),  'ftt_a':  float(raw.get('ftt_a', 0) or 0),
-            'mves_g': float(raw.get('mves_g', 0) or 0), 'mves_a': float(raw.get('mves_a', 0) or 0),
-            'prod_meta': float(raw.get('prod_meta', 0) or 0),
-            'prod_real': float(raw.get('prod_real', 0) or 0),
-            'nota_5s':   float(raw.get('nota_5s', 0) or 0),
+            'num_ocorrencias':  int(_float_br(raw.get('num_ocorrencias', 0))),
+            'd1_g':   _float_br(raw.get('d1_g', 0)),   'd1_a':   _float_br(raw.get('d1_a', 0)),
+            'ftt_g':  _float_br(raw.get('ftt_g', 0)),  'ftt_a':  _float_br(raw.get('ftt_a', 0)),
+            'mves_g': _float_br(raw.get('mves_g', 0)), 'mves_a': _float_br(raw.get('mves_a', 0)),
+            'prod_meta': _float_br(raw.get('prod_meta', 0)),
+            'prod_real': _float_br(raw.get('prod_real', 0)),
+            'nota_5s':   _float_br(raw.get('nota_5s', 0)),
             'msg_lideranca': limpar_texto_campo(raw.get('msg_lideranca', ''), 400),
         }, None
     except (ValueError, TypeError):
-        return None, ("Campos numéricos devem conter apenas números. "
-                       "Exemplo correto: 97.9 (use ponto, não vírgula)")
+        return None, "Campos numéricos devem conter apenas números (ponto ou vírgula). Exemplo: 97.9 ou 97,9"
 
 
 def _num_seguro(raw: dict, chave: str) -> float:
     try:
-        return float(raw.get(chave, 0) or 0)
+        return _float_br(raw.get(chave, 0))
     except (TypeError, ValueError):
         return 0.0
 
