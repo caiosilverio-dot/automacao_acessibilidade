@@ -280,8 +280,11 @@
       });
       const j = await r.json();
       if (j.ok) {
-        toast("DDS salvo! O boneco de Libras vai abrir em uma nova aba.", "ok", 6000);
         salvarAutosave();
+        // Navega esta mesma aba para o boneco (em vez de abrir uma aba nova):
+        // uma aba nova sem foco tem os timers do JS reduzidos pelo navegador,
+        // o que atrapalhava o clique automático que pula a saudação inicial.
+        window.location.href = j.abrir || "/apresentacao/";
       } else {
         toast(j.erro || "Erro ao salvar.", "err");
       }
@@ -395,7 +398,7 @@
       });
       const j = await r.json();
       if (j.ok) {
-        toast("Abrindo o boneco em uma nova aba…", "ok");
+        window.location.href = j.abrir || "/apresentacao/";
       } else {
         toast(j.erro || "Erro ao apresentar.", "err");
       }

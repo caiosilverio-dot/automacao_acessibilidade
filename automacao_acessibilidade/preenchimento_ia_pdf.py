@@ -420,14 +420,19 @@ def extrair_mensagem_pdf(caminho_pdf: str):
 # ==========================================
 # 7. AVATAR LIBRAS HTML
 # ==========================================
-def rodar_apresentacao_libras(texto_bruto=None):
-    """Abre o boneco de Libras. Se texto_bruto vier vazio, le o dados_dds.txt
+def rodar_apresentacao_libras(texto_bruto=None) -> bool:
+    """Gera as paginas HTML do boneco de Libras (resumo_dds_app.html e
+    resumo_dds_boneco.html). Se texto_bruto vier vazio, le o dados_dds.txt
     (fluxo do DDS diario); se vier preenchido, apresenta esse texto direto
-    (usado pelo tradutor de voz)."""
+    (usado pelo tradutor de voz). Quem abre a pagina e o proprio navegador
+    (a aba do formulario navega ate /apresentacao/) — nao o Python: abrir
+    como aba nova via webbrowser.open() deixava essa aba nova sem foco em
+    alguns navegadores, o que atrasa/atrapalha o clique automatico que pula
+    a saudacao do avatar (o "Oi, sou Icaro...")."""
     if texto_bruto is None:
         if not os.path.exists(CAMINHO_TXT):
             log.warning("rodar_apresentacao_libras: arquivo de texto não encontrado.")
-            return
+            return False
         with open(CAMINHO_TXT, "r", encoding="utf-8") as f:
             texto_bruto = f.read()
     texto = texto_bruto.replace("\n", ". ").replace('"', '&quot;').replace("'", "&#39;")
@@ -561,7 +566,7 @@ window.addEventListener('resize', ajustar);
 </body></html>"""
     with open(CAMINHO_HTML, "w", encoding="utf-8") as f:
         f.write(html_externo)
-    webbrowser.open(f'file:///{os.path.abspath(CAMINHO_HTML)}')
+    return True
 
 # ==========================================
 # 8. SERVIDOR WEB (INTERFACE)
@@ -658,6 +663,16 @@ def index():
 @app.get("/<path:nome>")
 def estaticos(nome):
     return send_from_directory(WEB_DIR, nome)
+
+
+@app.get("/apresentacao/")
+def apresentacao():
+    return send_from_directory(PASTA_ATUAL, "resumo_dds_app.html")
+
+
+@app.get("/apresentacao/<path:nome>")
+def apresentacao_asset(nome):
+    return send_from_directory(PASTA_ATUAL, nome)
 
 
 # ------------------------------------------
@@ -787,8 +802,8 @@ def api_salvar():
     with open(CAMINHO_TXT, "w", encoding="utf-8") as f:
         f.write(texto)
     log.info(f"DDS salvo ({len(texto)} chars)")
-    threading.Thread(target=rodar_apresentacao_libras, daemon=True).start()
-    return jsonify({"ok": True})
+    rodar_apresentacao_libras()
+    return jsonify({"ok": True, "abrir": "/apresentacao/"})
 
 
 @app.post("/api/apresentar_voz")
@@ -798,8 +813,8 @@ def api_apresentar_voz():
     if len(texto) < 3:
         return jsonify({"ok": False, "erro": "Ainda não há texto transcrito para apresentar."}), 400
     log.info(f"Tradutor de voz: apresentando ({len(texto)} chars)")
-    threading.Thread(target=rodar_apresentacao_libras, args=(texto,), daemon=True).start()
-    return jsonify({"ok": True})
+    rodar_apresentacao_libras(texto)
+    return jsonify({"ok": True, "abrir": "/apresentacao/"})
 
 def garantir_modelo_ollama():
     """Cria o modelo narrador-dds no Ollama se ainda não existir."""
