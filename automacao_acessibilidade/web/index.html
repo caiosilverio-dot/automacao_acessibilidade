@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Gestão DDS Acessível</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="bg-fx" aria-hidden="true"></div>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="brand-mark">DDS</div>
+    <div class="brand-text">
+      <span class="brand-title">Gestão DDS Acessível</span>
+      <span class="brand-sub">HPE · Diálogo Diário de Segurança em Libras</span>
+    </div>
+  </div>
+  <div class="topbar-right">
+    <span id="ollamaStatus" class="status-pill status-pending">
+      <span class="dot"></span> Verificando IA…
+    </span>
+  </div>
+</header>
+
+<nav class="tabs" role="tablist">
+  <button class="tab-btn active" data-tab="dds" role="tab" aria-selected="true">📋 DDS Diário</button>
+  <button class="tab-btn" data-tab="voz" role="tab" aria-selected="false">🎤 Tradutor de Voz</button>
+</nav>
+
+<main>
+  <!-- ===================== ABA DDS ===================== -->
+  <section id="tab-dds" class="tab-panel active">
+
+    <div class="flags-bar" id="flagsBar">
+      <div class="flag-chip" data-flag="seg"><span class="flag-dot"></span>Seg</div>
+      <div class="flag-chip" data-flag="d1"><span class="flag-dot"></span>D1</div>
+      <div class="flag-chip" data-flag="ftt"><span class="flag-dot"></span>FTT</div>
+      <div class="flag-chip" data-flag="mves"><span class="flag-dot"></span>MVES</div>
+      <div class="flag-chip" data-flag="prod"><span class="flag-dot"></span>Prod</div>
+      <div class="flag-chip" data-flag="s5"><span class="flag-dot"></span>5S</div>
+      <div class="flag-chip flag-geral" data-flag="geral"><span class="flag-dot"></span>GERAL</div>
+    </div>
+
+    <div class="grid">
+
+      <section class="card">
+        <h2 class="card-title"><span class="card-ico">📄</span>Diálogo de Segurança do Dia (PDF)</h2>
+        <div class="pdf-row">
+          <label class="btn btn-ghost file-btn">
+            📂 Carregar PDF
+            <input type="file" id="pdfInput" accept="application/pdf" hidden>
+          </label>
+          <span id="pdfLabel" class="pdf-label">Nenhum PDF carregado</span>
+        </div>
+        <textarea data-field="msg_pdf" class="field-textarea" rows="3" placeholder="Cole ou carregue a mensagem do dia..."></textarea>
+      </section>
+
+      <section class="card">
+        <div class="card-title-row">
+          <h2 class="card-title"><span class="card-ico">🛡️</span>Segurança</h2>
+          <div class="mini-flag" data-flag="seg"><span class="flag-dot"></span></div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Nº Ocorrências</label>
+          <input type="number" step="1" min="0" class="field-num live-flag" data-field="num_ocorrencias" value="0">
+        </div>
+        <textarea data-field="desc_ocorrencia" class="field-textarea" rows="2" placeholder="Descrição do acidente (se houver)..."></textarea>
+      </section>
+
+      <section class="card card-wide">
+        <div class="card-title-row">
+          <h2 class="card-title"><span class="card-ico">⚙️</span>Qualidade</h2>
+          <div class="mini-flag" data-flag="qual"><span class="flag-dot"></span></div>
+        </div>
+
+        <div class="indicadores-grid">
+          <div class="indicador-bloco">
+            <div class="indicador-head">
+              <span class="indicador-nome">D1</span>
+              <div class="mini-flag" data-flag="d1"><span class="flag-dot"></span></div>
+            </div>
+            <div class="indicador-inputs">
+              <label>Geral <input type="number" step="0.01" class="field-num" data-field="d1_g" value="0"></label>
+              <label>Área <input type="number" step="0.01" class="field-num live-flag" data-field="d1_a" value="0"></label>
+            </div>
+            <input type="text" class="field-inline" data-field="item_d1" placeholder="Item Foco D1...">
+          </div>
+
+          <div class="indicador-bloco">
+            <div class="indicador-head">
+              <span class="indicador-nome">FTT</span>
+              <div class="mini-flag" data-flag="ftt"><span class="flag-dot"></span></div>
+            </div>
+            <div class="indicador-inputs">
+              <label>Geral % <input type="number" step="0.01" class="field-num" data-field="ftt_g" value="0"></label>
+              <label>Área % <input type="number" step="0.01" class="field-num live-flag" data-field="ftt_a" value="0"></label>
+            </div>
+            <input type="text" class="field-inline" data-field="item_ftt" placeholder="Item Foco FTT...">
+          </div>
+
+          <div class="indicador-bloco">
+            <div class="indicador-head">
+              <span class="indicador-nome">MVES</span>
+              <div class="mini-flag" data-flag="mves"><span class="flag-dot"></span></div>
+            </div>
+            <div class="indicador-inputs">
+              <label>Geral <input type="number" step="0.01" class="field-num" data-field="mves_g" value="0"></label>
+              <label>Área <input type="number" step="0.01" class="field-num live-flag" data-field="mves_a" value="0"></label>
+            </div>
+            <input type="text" class="field-inline" data-field="item_mves" placeholder="Item Foco MVES...">
+          </div>
+        </div>
+        <p class="hint">A bandeira de cada indicador (e da Qualidade em geral) é definida comparando o valor <b>Área</b> com a meta de área do <code>config.json</code>.</p>
+      </section>
+
+      <section class="card">
+        <div class="card-title-row">
+          <h2 class="card-title"><span class="card-ico">📦</span>Produção</h2>
+          <div class="mini-flag" data-flag="prod"><span class="flag-dot"></span></div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Meta Ontem</label>
+          <input type="number" step="1" class="field-num live-flag" data-field="prod_meta" value="0">
+        </div>
+        <div class="field-row">
+          <label class="field-label">Real Ontem</label>
+          <input type="number" step="1" class="field-num live-flag" data-field="prod_real" value="0">
+        </div>
+      </section>
+
+      <section class="card">
+        <div class="card-title-row">
+          <h2 class="card-title"><span class="card-ico">🧹</span>5S (Organização)</h2>
+          <div class="mini-flag" data-flag="s5"><span class="flag-dot"></span></div>
+        </div>
+        <div class="field-row">
+          <label class="field-label">Nota 5S</label>
+          <input type="number" step="1" class="field-num live-flag" data-field="nota_5s" value="0">
+        </div>
+        <textarea data-field="desc_5s" class="field-textarea" rows="2" placeholder="Itens e Responsáveis pelo 5S..."></textarea>
+      </section>
+
+      <section class="card">
+        <h2 class="card-title"><span class="card-ico">💬</span>Mensagem da Liderança (opcional)</h2>
+        <textarea data-field="msg_lideranca" class="field-textarea" rows="3" placeholder="Mensagem opcional do multifuncional para os colaboradores surdos..."></textarea>
+      </section>
+
+      <section class="card card-wide">
+        <h2 class="card-title"><span class="card-ico">🎯</span>Finalização</h2>
+        <div class="field-row">
+          <label class="field-label">Prioridade Geral</label>
+          <select class="field-select" data-field="prio">
+            <option>SEGURANÇA</option>
+            <option>QUALIDADE</option>
+            <option>PRODUÇÃO</option>
+            <option>ORGANIZAÇÃO</option>
+          </select>
+        </div>
+
+        <div class="actions-row">
+          <button id="btnOtim" class="btn btn-purple">🤖 Otimizar <span class="kbd">Ctrl+O</span></button>
+          <button id="btnPrev" class="btn btn-blue">👁️ Preview <span class="kbd">Ctrl+P</span></button>
+          <button id="btnSave" class="btn btn-green">💾 Salvar <span class="kbd">Ctrl+S</span></button>
+          <button id="btnCancel" class="btn btn-ghost" disabled>⛔ Cancelar <span class="kbd">Esc</span></button>
+        </div>
+
+        <h3 class="preview-title">📋 Preview (editável)</h3>
+        <textarea id="preview" class="field-textarea preview-box" rows="12" placeholder="Clique em Preview para gerar a narração via IA..."></textarea>
+      </section>
+
+    </div>
+  </section>
+
+  <!-- ===================== ABA VOZ ===================== -->
+  <section id="tab-voz" class="tab-panel">
+    <div class="grid grid-single">
+      <section class="card">
+        <h2 class="card-title"><span class="card-ico">🎤</span>Tradutor de Voz para Libras</h2>
+        <p class="hint">Clique em Gravar, peça para a pessoa falar perto do microfone. A fala vai sendo transcrita
+          abaixo, direto no navegador. Quando estiver pronto, clique em Apresentar.</p>
+
+        <div id="vozAviso" class="warning-box hidden">
+          ⚠️ Reconhecimento de voz não é suportado neste navegador. Use Google Chrome ou Microsoft Edge.
+        </div>
+
+        <div class="actions-row">
+          <button id="btnGravar" class="btn btn-red">🎤 Gravar</button>
+          <button id="btnParar" class="btn btn-ghost" disabled>⏹️ Parar</button>
+          <button id="btnLimparVoz" class="btn btn-ghost">🗑️ Limpar</button>
+        </div>
+
+        <p id="statusVoz" class="status-line">Pronto para gravar.</p>
+
+        <h3 class="preview-title">📝 Texto transcrito (editável)</h3>
+        <textarea id="txtVoz" class="field-textarea preview-box" rows="10" placeholder="A transcrição aparece aqui..."></textarea>
+
+        <div class="actions-row">
+          <button id="btnApresentarVoz" class="btn btn-green btn-lg">🧑‍🤝‍🧑 Apresentar em Libras</button>
+        </div>
+      </section>
+    </div>
+  </section>
+</main>
+
+<div id="toastContainer" class="toast-container"></div>
+
+<div id="loadingOverlay" class="loading-overlay hidden">
+  <div class="spinner"></div>
+  <div id="loadingText" class="loading-text">Processando…</div>
+</div>
+
+<script src="app.js"></script>
+</body>
+</html>

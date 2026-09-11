@@ -1,16 +1,12 @@
 # -*- mode: python ; coding: utf-8 -*-
 import os
-import speech_recognition as _sr
 
-# Inclusao cirurgica (nao collect_all): o pacote speech_recognition tambem
-# traz o motor offline PocketSphinx (~38MB de dados de modelo acustico) e
-# binarios FLAC para todas as plataformas, que nunca sao usados aqui (so
-# usamos o reconhecimento online do Google). Incluir so o necessario evita
-# um .exe gigante (e o limite de 100MB do GitHub).
-_sr_dir = os.path.dirname(_sr.__file__)
-datas = [(os.path.join(_sr_dir, 'flac-win32.exe'), 'speech_recognition')]
+# A interface agora roda no navegador (Flask servindo a pasta web/) em vez
+# de CustomTkinter; o tradutor de voz usa a Web Speech API do proprio
+# navegador, entao o pacote speech_recognition/pyaudio nao e mais necessario.
+datas = [('web', 'web')]
 binaries = []
-hiddenimports = ['pyaudio', 'speech_recognition.recognizers.google']
+hiddenimports = ['flask']
 
 a = Analysis(
     ['preenchimento_ia_pdf.py'],
