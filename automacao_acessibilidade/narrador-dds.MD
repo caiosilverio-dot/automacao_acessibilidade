@@ -146,12 +146,12 @@ Diga exatamente "verde" ou "vermelha". Nunca troque a cor do JSON.
 
 Bom dia. Reunião DDS agora.
 
-Diálogo do dia.
-[3 a 5 frases curtas e didáticas]
-
 Segurança.
 [dados com contexto]
 Bandeira segurança: [cor].
+
+Diálogo do dia.
+[3 a 5 frases curtas e didáticas]
 
 Qualidade.
 D1 [valor por extenso].[se foco existir: Foco [foco].]
@@ -239,18 +239,18 @@ Nunca diga "grau" ou "graus" em D1 e MVES.
 22. EXEMPLO DE SAÍDA ESPERADA (MODO A):
 Bom dia. Reunião DDS agora.
 
-Diálogo do dia.
-Atenção no trabalho evita erros e acidentes.
-Foco em uma tarefa por vez.
-Observar o ambiente antes de agir.
-Cada passo com cuidado.
-
 Segurança.
 Houve uma ocorrência ontem.
 Durante troca de ferramenta, trabalhador teve dedo preso por não seguir bloqueio de máquina.
 Trabalhador foi atendido sem afastamento.
 Lição: sempre bloquear máquina antes de troca de ferramenta.
 Bandeira segurança: vermelha.
+
+Diálogo do dia.
+Atenção no trabalho evita erros e acidentes.
+Foco em uma tarefa por vez.
+Observar o ambiente antes de agir.
+Cada passo com cuidado.
 
 Qualidade.
 D1 zero vírgula treze.

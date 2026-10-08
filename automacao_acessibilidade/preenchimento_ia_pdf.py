@@ -343,11 +343,26 @@ def chamar_ia(prompt: str, system_prompt: str = None, usar_cache: bool = True) -
         log.error(f"IA erro: {e}")
     return None
 
+def reordenar_dialogo_apos_seguranca(texto: str) -> str:
+    """Garante a ordem: saudação, Segurança (+ bandeira), Diálogo do dia, resto.
+    Necessário porque o modelo já criado no Ollama pode ainda usar a ordem antiga."""
+    m_dia = re.search(r'^Di[áa]logo do dia\.', texto, re.MULTILINE)
+    m_seg = re.search(r'^Seguran[çc]a\.', texto, re.MULTILINE)
+    if not m_dia or not m_seg or m_dia.start() > m_seg.start():
+        return texto
+    m_fim = re.search(r'^(Qualidade|Produ[çc][ãa]o|Organiza[çc][ãa]o)\b', texto[m_seg.start():], re.MULTILINE)
+    if not m_fim:
+        return texto
+    fim_seg = m_seg.start() + m_fim.start()
+    dialogo = texto[m_dia.start():m_seg.start()].strip()
+    seguranca = texto[m_seg.start():fim_seg].strip()
+    return (texto[:m_dia.start()] + seguranca + "\n\n" + dialogo + "\n\n" + texto[fim_seg:]).strip()
+
 def gerar_texto_via_ia(json_dds: dict) -> str:
     prompt = json.dumps(json_dds, ensure_ascii=False)
     resposta = chamar_ia(prompt)
     if resposta and len(resposta) > 50:
-        return resposta
+        return reordenar_dialogo_apos_seguranca(resposta)
     log.warning("Usando fallback Python (IA falhou ou resposta curta)")
     return gerar_fallback(json_dds)
 
@@ -358,13 +373,13 @@ def gerar_fallback(j: dict) -> str:
     bloco_lid = f"\n\nMensagem da liderança.\n{msg_lid}" if msg_lid else ""
     return f"""Bom dia. Reunião DDS agora.
 
-Diálogo do dia.
-{j.get('dialogo_dia', '')}
-
 Segurança.
 {ocor_txt}
 {('Descrição: ' + seg['descricao'] + '.') if seg['descricao'] else ''}
 Bandeira segurança: {seg['bandeira']}.
+
+Diálogo do dia.
+{j.get('dialogo_dia', '')}
 
 Qualidade.
 D1 geral {qual['d1_geral']}. D1 área {qual['d1_area']}.{(' Foco ' + qual['d1_foco'] + '.') if qual['d1_foco'] else ''}
