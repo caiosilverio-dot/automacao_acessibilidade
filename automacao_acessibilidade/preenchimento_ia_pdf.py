@@ -11,6 +11,8 @@ import logging
 from datetime import datetime
 import re
 import webbrowser
+import platform
+import socket
 
 from flask import Flask, request, jsonify, send_from_directory
 
@@ -50,10 +52,19 @@ CAMINHO_LOG      = os.path.join(PASTA_ATUAL, "dds_app.log")
 logging.basicConfig(
     filename=CAMINHO_LOG,
     level=logging.INFO,
-    format='%(asctime)s [%(levelname)s] %(message)s',
+    format='%(asctime)s [%(levelname)-7s] [%(threadName)s] %(message)s',
     encoding='utf-8'
 )
 log = logging.getLogger("DDS")
+
+# Log inicial de diagnóstico de ambiente
+log.info("="*50)
+log.info("INICIANDO DDS ACESSÍVEL")
+log.info(f"OS: {platform.system()} {platform.release()} ({platform.version()})")
+log.info(f"Python: {platform.python_version()}")
+log.info(f"Pasta Atual: {PASTA_ATUAL}")
+log.info(f"PyMuPDF instalado: {TEM_PYMUPDF}")
+log.info("="*50)
 
 CONFIG_PADRAO = {
     "ollama_url": "http://localhost:11434/api/generate",
@@ -272,9 +283,9 @@ def montar_json_dds(dados: dict) -> dict:
         "dialogo_dia": dados['msg_pdf'],
         "seguranca": {"ocorrencias": num_ocor, "descricao": msg_seg, "bandeira": b["seg"]},
         "qualidade": {
-            "d1": dados['d1_g'], "d1_foco": dados['item_d1'], "d1_bandeira": b["d1"],
-            "ftt": dados['ftt_g'], "ftt_foco": dados['item_ftt'], "ftt_bandeira": b["ftt"],
-            "mves": dados['mves_g'], "mves_foco": dados['item_mves'], "mves_bandeira": b["mves"],
+            "d1_geral": dados['d1_g'], "d1_area": dados['d1_a'], "d1_foco": dados['item_d1'], "d1_bandeira": b["d1"],
+            "ftt_geral": dados['ftt_g'], "ftt_area": dados['ftt_a'], "ftt_foco": dados['item_ftt'], "ftt_bandeira": b["ftt"],
+            "mves_geral": dados['mves_g'], "mves_area": dados['mves_a'], "mves_foco": dados['item_mves'], "mves_bandeira": b["mves"],
             "bandeira": b["qual"]
         },
         "producao": {"real": dados['prod_real'], "meta": dados['prod_meta'], "bandeira": b["prod"]},
@@ -356,11 +367,11 @@ Segurança.
 Bandeira segurança: {seg['bandeira']}.
 
 Qualidade.
-D1 {qual['d1']}.{(' Foco ' + qual['d1_foco'] + '.') if qual['d1_foco'] else ''}
+D1 geral {qual['d1_geral']}. D1 área {qual['d1_area']}.{(' Foco ' + qual['d1_foco'] + '.') if qual['d1_foco'] else ''}
 Bandeira D1: {qual['d1_bandeira']}.
-FTT {qual['ftt']} por cento.{(' Foco ' + qual['ftt_foco'] + '.') if qual['ftt_foco'] else ''}
+FTT geral {qual['ftt_geral']} por cento. FTT área {qual['ftt_area']} por cento.{(' Foco ' + qual['ftt_foco'] + '.') if qual['ftt_foco'] else ''}
 Bandeira FTT: {qual['ftt_bandeira']}.
-MVES {qual['mves']}.{(' Foco ' + qual['mves_foco'] + '.') if qual['mves_foco'] else ''}
+MVES geral {qual['mves_geral']}. MVES área {qual['mves_area']}.{(' Foco ' + qual['mves_foco'] + '.') if qual['mves_foco'] else ''}
 Bandeira MVES: {qual['mves_bandeira']}.
 Bandeira qualidade: {qual['bandeira']}.
 
@@ -435,6 +446,7 @@ def rodar_apresentacao_libras(texto_bruto=None) -> bool:
             return False
         with open(CAMINHO_TXT, "r", encoding="utf-8") as f:
             texto_bruto = f.read()
+    log.info(f"Gerando HTML do VLibras para texto de {len(texto_bruto)} caracteres.")
     texto = texto_bruto.replace("\n", ". ").replace('"', '&quot;').replace("'", "&#39;")
 
     # Pagina interna: contem o widget do VLibras de verdade. Fica numa janela
@@ -450,19 +462,24 @@ html,body{{width:100vw;height:100vh;overflow:hidden!important;background:#1a1a2e
 <script src="https://vlibras.gov.br/app/vlibras-plugin.js"></script>
 <script>
 new window.VLibras.Widget('https://vlibras.gov.br/app');
+function logToServer(msg, level){{
+fetch('/api/log_client',{{method:'POST',body:JSON.stringify({{msg:msg,level:level||'INFO'}})}}).catch(function(){{}});
+}}
+window.onerror=function(message,source,lineno){{logToServer('Erro JS global: '+message+' na linha '+lineno,'ERROR');}};
+logToServer('Iniciando carregamento do VLibras Widget.');
 function abrirBoneco(){{
 var wrap=document.getElementById('vlibras-access-wrapper');
 var btn=wrap&&wrap.shadowRoot?wrap.shadowRoot.querySelector('#vlibras-button'):null;
-if(btn){{btn.click();return true;}}
+if(btn){{btn.click();logToServer('Botão principal do VLibras (abrir) clicado.');return true;}}
 return false;
 }}
 function expandirBoneco(){{
 var root=document.getElementById('vlibras-app-root');
 var btn=root&&root.shadowRoot?root.shadowRoot.querySelector('button[aria-label="Expandir"]'):null;
-if(btn){{btn.click();return true;}}
+if(btn){{btn.click();logToServer('Botão Expandir clicado.');return true;}}
 return false;
 }}
-function pularBoneco(){{
+function pularBoneco(tentativa){{
 // Chegamos a tentar window.vlibras.stop() direto (sem esperar o botao
 // "Pular" renderizar), mas na pratica isso so muda uma flag interna --
 // a animacao da saudacao dentro do player Unity continua tocando ate o
@@ -474,7 +491,11 @@ var sr=root&&root.shadowRoot?root.shadowRoot:null;
 if(!sr)return false;
 var btns=Array.from(sr.querySelectorAll('button'));
 var btn=btns.find(function(b){{return b.textContent.trim()==='Pular';}});
-if(btn){{btn.click();return true;}}
+if(btn){{btn.click();if(!window._pulouLogado){{window._pulouLogado=true;logToServer("SUCESSO: Botão 'Pular' clicado na tentativa "+tentativa);}}return true;}}
+if(tentativa%10===0){{
+var textos=btns.map(function(b){{return b.textContent.trim()||b.getAttribute('aria-label')||'Vazio';}}).join(', ');
+logToServer("Buscando 'Pular' (T:"+tentativa+"). Botões encontrados: ["+textos+"]","WARN");
+}}
 return false;
 }}
 function avatarPronto(){{
@@ -492,8 +513,10 @@ if(!iframe)return false;
 return parseFloat(getComputedStyle(iframe).opacity)>=1;
 }}
 window.addEventListener('load',function(){{
+logToServer('Window carregada, iniciando rotina de cliques.');
 var tentativas=0,abriu=false,expandiu=false,prontoCount=0,despachado=false;
 function disparar(){{
+logToServer('Disparando envio do texto para o Avatar.');
 var el=document.getElementById('alvo');el.style.fontSize='16px';el.style.width='auto';el.style.height='auto';
 var range=document.createRange();range.selectNodeContents(el);var sel=window.getSelection();sel.removeAllRanges();sel.addRange(range);
 el.dispatchEvent(new MouseEvent('mouseup',{{bubbles:true}}));el.dispatchEvent(new MouseEvent('click',{{bubbles:true}}));
@@ -502,16 +525,16 @@ var esperaBotao=setInterval(function(){{
 tentativas++;
 if(!abriu)abriu=abrirBoneco();
 if(abriu&&!expandiu)expandiu=expandirBoneco();
-if(expandiu)pularBoneco();
+if(expandiu)pularBoneco(tentativas);
 if(expandiu&&!despachado){{
 if(avatarPronto()){{prontoCount++;}}else{{prontoCount=0;}}
 if(prontoCount>=4){{despachado=true;disparar();}}
 }}
-if(despachado||tentativas>400){{clearInterval(esperaBotao);}}
+if(despachado||tentativas>400){{clearInterval(esperaBotao);if(!despachado)logToServer('Timeout atingido (40s) na rotina de cliques.','ERROR');}}
 }},100);
 // Rede de seguranca: se por algum motivo a deteccao acima falhar, garante
 // que o texto seja lido mesmo assim depois de um tempo generoso.
-setTimeout(function(){{if(!despachado){{despachado=true;disparar();}}}},45000);
+setTimeout(function(){{if(!despachado){{logToServer('Rede de segurança acionada (45s). Disparando texto.','WARN');despachado=true;disparar();}}}},45000);
 }});
 // Se esta janela for tapada/minimizada durante a apresentacao (por outra
 // janela por cima, notificacao do Windows, etc.), o Chrome/Edge marca a
@@ -698,6 +721,21 @@ def api_heartbeat():
     return jsonify({"ok": True})
 
 
+@app.post("/api/log_client")
+def api_log_client():
+    """Recebe logs disparados pelo JavaScript no navegador."""
+    raw = request.get_json(force=True, silent=True) or {}
+    msg = raw.get("msg", "Log vazio do cliente")
+    level = str(raw.get("level", "INFO")).upper()
+    if level == "ERROR":
+        log.error(f"[NAVEGADOR] {msg}")
+    elif level in ("WARN", "WARNING"):
+        log.warning(f"[NAVEGADOR] {msg}")
+    else:
+        log.info(f"[NAVEGADOR] {msg}")
+    return jsonify({"ok": True})
+
+
 @app.get("/api/status")
 def api_status():
     ok, msg = ollama_online()
@@ -855,32 +893,49 @@ def garantir_modelo_ollama():
         log.warning(f"Não foi possível criar modelo automaticamente: {e}")
 
 # ==========================================
-# 9. ENTRADA
+# 9. ENTRADA E INICIALIZAÇÃO
 # ==========================================
 PORTA_WEB = 5057
 
 def _abrir_navegador():
-    time.sleep(1.2)
-    webbrowser.open(f'http://127.0.0.1:{PORTA_WEB}')
+    time.sleep(1.5)
+    url = f'http://127.0.0.1:{PORTA_WEB}'
+    log.info(f"Abrindo navegador na URL: {url}")
+    try:
+        webbrowser.open(url)
+    except Exception as e:
+        log.error(f"Erro ao tentar abrir navegador: {e}")
 
 def _vigiar_navegador_fechado():
     """Encerra o processo se nenhuma aba do app mandar heartbeat por um
     tempo (aba/navegador fechado) -- sem isso o app ficava rodando
     escondido pra sempre e travava o .exe pra copiar/mover."""
     ULTIMO_HEARTBEAT["ts"] = time.time()
+    log.info("Vigilante de heartbeat iniciado.")
     while True:
         time.sleep(3)
         if time.time() - ULTIMO_HEARTBEAT["ts"] > HEARTBEAT_TIMEOUT_SEGUNDOS:
             log.info("Nenhum sinal do navegador — encerrando aplicação.")
             os._exit(0)
 
+def checar_porta_ocupada(porta):
+    with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+        return s.connect_ex(('127.0.0.1', porta)) == 0
+
 if __name__ == "__main__":
     try:
+        log.info("Iniciando verificação pré-voo...")
+        if checar_porta_ocupada(PORTA_WEB):
+            log.error(f"A porta {PORTA_WEB} já está em uso! O aplicativo pode estar travado em segundo plano.")
         garantir_modelo_ollama()
         threading.Thread(target=_abrir_navegador, daemon=True).start()
         threading.Thread(target=_vigiar_navegador_fechado, daemon=True).start()
+        log.info(f"Iniciando servidor Flask na porta {PORTA_WEB}...")
         app.run(host="127.0.0.1", port=PORTA_WEB, debug=False, use_reloader=False, threaded=True)
     except Exception:
-        with open(os.path.join(PASTA_ATUAL, "erro_log.txt"), "w", encoding="utf-8") as f:
-            f.write(traceback.format_exc())
-        log.critical(traceback.format_exc())
+        erro_formatado = traceback.format_exc()
+        log.critical(f"FALHA CRÍTICA NA INICIALIZAÇÃO: 
+{erro_formatado}")
+        with open(os.path.join(PASTA_ATUAL, "erro_log_fatal.txt"), "w", encoding="utf-8") as f:
+            f.write(f"ERRO FATAL:
+{erro_formatado}")
