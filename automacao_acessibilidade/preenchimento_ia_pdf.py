@@ -934,8 +934,6 @@ if __name__ == "__main__":
         app.run(host="127.0.0.1", port=PORTA_WEB, debug=False, use_reloader=False, threaded=True)
     except Exception:
         erro_formatado = traceback.format_exc()
-        log.critical(f"FALHA CRÍTICA NA INICIALIZAÇÃO: 
-{erro_formatado}")
+        log.critical(f"FALHA CRÍTICA NA INICIALIZAÇÃO:\n{erro_formatado}")
         with open(os.path.join(PASTA_ATUAL, "erro_log_fatal.txt"), "w", encoding="utf-8") as f:
-            f.write(f"ERRO FATAL:
-{erro_formatado}")
+            f.write(f"ERRO FATAL:\n{erro_formatado}")
